@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 纯背景图</title>
+    <title>老虎机 | 功能区域适配</title>
     <style>
         * {
             margin: 0;
@@ -19,19 +20,16 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* 主容器：固定宽500，高100vh，无额外背景色或阴影 */
         .app {
             width: 500px;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        /* 上板块：背景图，尺寸覆盖，无额外颜色 */
         .panel-top {
             flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
         }
-        /* 中板块：背景图，内嵌滚轮区域 */
         .panel-mid {
             flex: 28.1;
             background: url('slot-mid.png') center/cover no-repeat;
@@ -41,7 +39,6 @@
             gap: 16px;
             position: relative;
         }
-        /* 下板块：背景图 */
         .panel-bottom {
             flex: 34.4;
             background: url('slot-bottom.jpg') center/cover no-repeat;
@@ -50,8 +47,10 @@
             justify-content: center;
             align-items: center;
             gap: 12px;
+            /* 移除任何可能干扰的样式 */
+            box-shadow: none;
+            border: none;
         }
-        /* 滚轮容器：纯黑半透明底，无圆角 */
         .reel {
             width: 90px;
             height: 120px;
@@ -64,18 +63,17 @@
             transition: transform 0.05s linear;
         }
         .reel-item {
-            width: 120px;
+            width: 90px;
             height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .reel-img {
-            width: 120px;
-            height: 120px;
+            width: 75px;
+            height: 75px;
             object-fit: contain;
         }
-        /* 中奖线：纯渐变，无阴影 */
         .win-line {
             position: absolute;
             top: 50%;
@@ -86,25 +84,31 @@
             pointer-events: none;
             transform: translateY(-50%);
         }
-        /* 信息区：半透黑底，无边框圆角 */
+        /* 底部功能区域布局 - 适配背景图设计 */
         .info {
             display: flex;
-            gap: 20px;
-            background: rgba(0,0,0,0.6);
-            padding: 8px 20px;
+            justify-content: space-around;
+            width: 80%;
+            background: rgba(0,0,0,0.45);
+            padding: 8px 0;
             color: #ffd966;
             font-size: 0.8rem;
+            text-align: center;
+        }
+        .info div {
+            flex: 1;
         }
         .info span {
             font-weight: bold;
-            margin-left: 6px;
+            margin-left: 4px;
         }
-        /* 押分栏 */
         .bet {
             display: flex;
-            gap: 15px;
-            background: rgba(0,0,0,0.6);
-            padding: 5px 16px;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background: rgba(0,0,0,0.45);
+            padding: 8px 20px;
         }
         .bet button {
             background: #2a2a3a;
@@ -119,7 +123,13 @@
         .bet button:active {
             transform: translateY(1px);
         }
-        /* 旋转按钮 */
+        .bet span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffd966;
+            min-width: 60px;
+            text-align: center;
+        }
         .spin {
             background: #ffcf6e;
             border: none;
@@ -129,6 +139,7 @@
             font-weight: bold;
             color: #2d1e09;
             cursor: pointer;
+            margin-top: 4px;
         }
         .spin:active {
             transform: translateY(2px);
@@ -156,7 +167,7 @@
         </div>
         <div class="bet">
             <button id="minus">−</button>
-            <span style="width:60px;text-align:center;color:#ffd966;">20</span>
+            <span id="betValue">20</span>
             <button id="plus">+</button>
         </div>
         <button class="spin" id="spinBtn">🎰 旋转 🎰</button>
@@ -179,6 +190,13 @@
     let spinning = false;
 
     const stripDivs = [document.getElementById('strip0'), document.getElementById('strip1'), document.getElementById('strip2')];
+    const balanceSpan = document.getElementById('balance');
+    const scoreSpan = document.getElementById('score');
+    const betAmountSpan = document.getElementById('betAmount');
+    const betValueSpan = document.getElementById('betValue');
+    const minusBtn = document.getElementById('minus');
+    const plusBtn = document.getElementById('plus');
+    const spinBtn = document.getElementById('spinBtn');
 
     function renderReel(i) {
         const s = strips[i];
@@ -197,10 +215,10 @@
     }
 
     function updateUI() {
-        document.getElementById('balance').innerText = balance;
-        document.getElementById('score').innerText = score;
-        document.getElementById('betAmount').innerText = bet;
-        document.querySelector('.bet span').innerText = bet;
+        balanceSpan.innerText = balance;
+        scoreSpan.innerText = score;
+        betAmountSpan.innerText = bet;
+        betValueSpan.innerText = bet;
     }
 
     async function spin() {
@@ -255,12 +273,20 @@
         startReel(2, delays[2]);
     }
 
-    document.getElementById('minus').onclick = () => { if(bet>10) { bet-=10; updateUI(); } };
-    document.getElementById('plus').onclick = () => { if(bet<500) { bet+=10; updateUI(); } };
-    document.getElementById('spinBtn').onclick = spin;
+    minusBtn.onclick = () => { if(bet>10) { bet-=10; updateUI(); } };
+    plusBtn.onclick = () => { if(bet<500) { bet+=10; updateUI(); } };
+    spinBtn.onclick = spin;
 
     for(let i=0;i<3;i++) renderReel(i);
     updateUI();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
