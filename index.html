@@ -1,4 +1,35 @@
-<!DOCTYPE html>
+ton id="floatToggle" style="width:48px;height:48px;background:rgba(255,170,51,0.9);color:#1a1a0a;border:none;border-radius:50%;font-size:20px;cursor:pointer">☰</button>
+  `;
+  document.body.appendChild(container);
+  document.getElementById('floatToggle').onclick = function() {
+    const menu = document.getElementById('floatMenu');
+    if (menu.style.display === 'none' || !menu.style.display) {
+      menu.style.display = 'flex';
+      this.innerText = '✕';
+    } else {
+      menu.style.display = 'none';
+      this.innerText = '☰';
+    }
+  };
+}
+
+// ---------- 启动 ----------
+(async function init() {
+  const saved = localStorage.getItem('cu');
+  if (saved) {
+    try {
+      const u = JSON.parse(saved);
+      const res = await apiCall('GET', `/user/${u.account}/profile`);
+      currentUser = res.user;
+      createFloatingButtons();
+      renderGame();
+    } catch (e) {
+      localStorage.removeItem('cu');
+      alert('请先登录'); location.href = '/';
+    }
+  } else {
+    alert('请先登录'); location.href = '/';
+  }<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
