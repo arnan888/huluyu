@@ -5,30 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>老虎机 | 三色虎头</title>
     <style>
-        * { user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        body { background: radial-gradient(circle at 30% 20%, #1a1208, #0a0602); min-height: 100vh; display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 20px; }
-        .game-frame { background: #2a1c0e; background-size: cover; border-radius: 70px; padding: 30px 24px 40px; box-shadow: 0 20px 30px black, inset 0 0 0 3px #f3bc4b, inset 0 0 0 8px #221708; max-width: 800px; width: 100%; }
-        .stage { background: rgba(0,0,0,0.2); border-radius: 60px; padding: 30px 15px; position: relative; }
-        .reels-container { display: flex; justify-content: center; gap: 25px; align-items: center; position: relative; z-index: 10; }
-        .reel { flex: 1; background: #0f0b04; border-radius: 30px; height: 360px; overflow: hidden; position: relative; box-shadow: inset 0 0 0 3px #6e4f25, 0 10px 20px black; z-index: 15; }
-        .reel-strip { display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.15, 1.2); will-change: transform; }
-        .tiger-item { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; background: #1a1408; }
-        .tiger-item img { width: 100px; height: 100px; object-fit: contain; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
-        .center-line { position: absolute; top: 50%; left: 6%; width: 88%; height: 5px; background: linear-gradient(90deg, #ffd966, #ffaa33, #ffd966); box-shadow: 0 0 12px #ffaa66; border-radius: 4px; transform: translateY(-50%); z-index: 5; pointer-events: none; transition: box-shadow 0.2s; }
-        .center-line.win-glow { box-shadow: 0 0 20px 4px #ffcc44, 0 0 30px #ffaa33; background: radial-gradient(circle, #ffea80, #ffb347); }
-        .info-panel { background: #1e160ccc; backdrop-filter: blur(8px); border-radius: 48px; padding: 18px; margin-top: 28px; }
-        .stats { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 20px; }
-        .stat-card { background: #00000066; border-radius: 60px; padding: 6px 0; text-align: center; flex: 1; }
-        .stat-card span:first-child { font-size: 0.7rem; color: #ffcf6e; }
-        .stat-card span:last-child { font-size: 1.8rem; font-weight: bold; color: #ffbb44; display: block; }
-        button { background: radial-gradient(circle at 30% 20%, #ffcf6e, #be691f); width: 100%; border: none; font-size: 1.5rem; font-weight: bold; padding: 12px 0; border-radius: 60px; color: #2d1e09; box-shadow: 0 7px 0 #784818; cursor: pointer; transition: 0.05s linear; }
-        button:active { transform: translateY(4px); box-shadow: 0 2px 0 #784818; }
-        .rule { background: #00000055; border-radius: 40px; padding: 8px; margin-top: 18px; font-size: 0.7rem; color: #ffda99; text-align: center; }
-        .result-area { background: #0e0b04; margin-top: 18px; border-radius: 60px; padding: 10px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #ffcd82; }
-        @media (max-width: 650px) { .reel { height: 240px; } .tiger-item { height: 80px; } .tiger-item img { width: 65px; height: 65px; } .center-line { height: 3px; } }
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url('bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .game-frame {
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(2px);
+            border-radius: 70px;
+            padding: 30px 24px 40px;
+            box-shadow: 0 20px 30px black, inset 0 0 0 3px #f3bc4b, inset 0 0 0 8px #221708;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .stage {
+            background: rgba(0,0,0,0.3);
+            border-radius: 60px;
+            padding: 30px 15px;
+            position: relative;
+        }
+
+        .reels-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .reel {
+            flex: 1;
+            background: #0f0b04;
+            border-radius: 30px;
+            height: 360px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 0 3px #6e4f25, 0 10px 20px black;
+            z-index: 15;
+        }
+
+        .reel-strip {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.15, 1.2);
+            will-change: transform;
+        }
+
+        .tiger-item {
+            width: 100%;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.4);
+        }
+
+        .tiger-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+        }
+
+        .center-line {
+            position: absolute;
+            top: 50%;
+            left: 6%;
+            width: 88%;
+            height: 5px;
+            background: linear-gradient(90deg, #ffd966, #ffaa33, #ffd966);
+            box-shadow: 0 0 12px #ffaa66;
+            border-radius: 4px;
+            transform: translateY(-50%);
+            z-index: 5;
+            pointer-events: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .center-line.win-glow {
+            box-shadow: 0 0 20px 4px #ffcc44, 0 0 30px #ffaa33;
+            background: radial-gradient(circle, #ffea80, #ffb347);
+        }
+
+        .info-panel {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 18px;
+            margin-top: 28px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #000000aa;
+            border-radius: 60px;
+            padding: 6px 0;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-card span:first-child {
+            font-size: 0.7rem;
+            color: #ffcf6e;
+        }
+        .stat-card span:last-child {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffbb44;
+            display: block;
+        }
+
+        button {
+            background: radial-gradient(circle at 30% 20%, #ffcf6e, #be691f);
+            width: 100%;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 12px 0;
+            border-radius: 60px;
+            color: #2d1e09;
+            box-shadow: 0 7px 0 #784818;
+            cursor: pointer;
+            transition: 0.05s linear;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #784818;
+        }
+
+        .rule {
+            background: #000000aa;
+            border-radius: 40px;
+            padding: 8px;
+            margin-top: 18px;
+            font-size: 0.7rem;
+            color: #ffda99;
+            text-align: center;
+        }
+        .result-area {
+            background: #0e0b04cc;
+            margin-top: 18px;
+            border-radius: 60px;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #ffcd82;
+        }
+
+        @media (max-width: 650px) {
+            .reel { height: 240px; }
+            .tiger-item { height: 80px; }
+            .tiger-item img { width: 65px; height: 65px; }
+            .center-line { height: 3px; }
+        }
     </style>
 </head>
 <body>
+
 <div class="game-frame">
     <div class="stage">
         <div class="reels-container" id="reelsContainer"></div>
@@ -40,29 +200,54 @@
             <div class="stat-card"><span>🎲 下注</span><span id="betAmount">20</span></div>
         </div>
         <button id="spinBtn">🎰 拉 下 摇 杆 🎰</button>
-        <div class="rule">🐅 九只老虎三色（绿/红/金）<br>滚轮停止 → 露出中间虎头 → 颜色相同即中奖 (28/58/88倍)</div>
+        <div class="rule">
+            🐅 九只老虎三色（绿/红/金）<br>
+            滚轮停止 → 露出中间虎头 → 颜色相同即中奖 (28/58/88倍)
+        </div>
         <div class="result-area" id="resultMsg">✨ 摇杆，中线从老虎后面穿过 ✨</div>
     </div>
 </div>
+
 <script>
-    const TIGER_IMAGES = { green: 'tiger-green.png', red: 'tiger-red.png', gold: 'tiger-gold.png' };
+    // 老虎图片（直接放在根目录）
+    const TIGER_IMAGES = {
+        green: 'tiger-green.png',
+        red: 'tiger-red.png',
+        gold: 'tiger-gold.png'
+    };
+
     const TIGER_TYPES = [
         { name: '绿虎', color: 'green', imgSrc: TIGER_IMAGES.green, multiplier: 28 },
         { name: '红虎', color: 'red', imgSrc: TIGER_IMAGES.red, multiplier: 58 },
         { name: '金虎', color: 'gold', imgSrc: TIGER_IMAGES.gold, multiplier: 88 }
     ];
-    function generateRandomReelStrip() { const strip = []; for (let i = 0; i < 3; i++) { const randomType = TIGER_TYPES[Math.floor(Math.random() * TIGER_TYPES.length)]; strip.push({ ...randomType }); } return strip; }
-    let reelsData = [ generateRandomReelStrip(), generateRandomReelStrip(), generateRandomReelStrip() ];
+
+    function generateRandomReelStrip() {
+        const strip = [];
+        for (let i = 0; i < 3; i++) {
+            const randomType = TIGER_TYPES[Math.floor(Math.random() * TIGER_TYPES.length)];
+            strip.push({ ...randomType });
+        }
+        return strip;
+    }
+
+    let reelsData = [
+        generateRandomReelStrip(),
+        generateRandomReelStrip(),
+        generateRandomReelStrip()
+    ];
     let currentMiddleIndices = [1, 1, 1];
     let balance = 1000;
     const BET = 20;
     let isSpinning = false;
+
     const reelsContainer = document.getElementById('reelsContainer');
     const balanceSpan = document.getElementById('balance');
     const resultMsgSpan = document.getElementById('resultMsg');
     const spinBtn = document.getElementById('spinBtn');
     const centerLine = document.getElementById('centerLine');
     let reelStrips = [];
+
     function renderReels() {
         reelsContainer.innerHTML = '';
         reelStrips = [];
@@ -87,13 +272,22 @@
         }
         for (let i = 0; i < 3; i++) updateReelOffset(i, 1);
     }
+
     function updateReelOffset(reelIndex, middleIndex) {
         if (!reelStrips[reelIndex]) return;
         const itemHeight = document.querySelector('.tiger-item')?.offsetHeight || 120;
         const offsetY = -(middleIndex * itemHeight);
         reelStrips[reelIndex].style.transform = `translateY(${offsetY}px)`;
     }
-    function getCurrentTigers() { return [ reelsData[0][currentMiddleIndices[0]], reelsData[1][currentMiddleIndices[1]], reelsData[2][currentMiddleIndices[2]] ]; }
+
+    function getCurrentTigers() {
+        return [
+            reelsData[0][currentMiddleIndices[0]],
+            reelsData[1][currentMiddleIndices[1]],
+            reelsData[2][currentMiddleIndices[2]]
+        ];
+    }
+
     function calculateMultiplier(tigers) {
         const c1 = tigers[0].color, c2 = tigers[1].color, c3 = tigers[2].color;
         if (c1 === c2 && c2 === c3) {
@@ -103,23 +297,39 @@
         }
         return 0;
     }
+
     async function spin() {
         if (isSpinning) return;
-        if (balance < BET) { resultMsgSpan.innerText = '积分不足！刷新重置'; return; }
+        if (balance < BET) {
+            resultMsgSpan.innerText = '积分不足！刷新重置';
+            return;
+        }
         isSpinning = true;
         spinBtn.disabled = true;
         balance -= BET;
         balanceSpan.innerText = balance;
         centerLine.classList.remove('win-glow');
+
         let spinCount = 0;
         const MAX_SPINS = 18;
-        const finalMiddleIndices = [ Math.floor(Math.random() * 3), Math.floor(Math.random() * 3), Math.floor(Math.random() * 3) ];
+        const finalMiddleIndices = [
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3)
+        ];
+
         const interval = setInterval(() => {
-            for (let i = 0; i < 3; i++) { const randomIndex = Math.floor(Math.random() * 3); updateReelOffset(i, randomIndex); }
+            for (let i = 0; i < 3; i++) {
+                const randomIndex = Math.floor(Math.random() * 3);
+                updateReelOffset(i, randomIndex);
+            }
             spinCount++;
             if (spinCount >= MAX_SPINS) {
                 clearInterval(interval);
-                for (let i = 0; i < 3; i++) { currentMiddleIndices[i] = finalMiddleIndices[i]; updateReelOffset(i, finalMiddleIndices[i]); }
+                for (let i = 0; i < 3; i++) {
+                    currentMiddleIndices[i] = finalMiddleIndices[i];
+                    updateReelOffset(i, finalMiddleIndices[i]);
+                }
                 const finalTigers = getCurrentTigers();
                 const multiplier = calculateMultiplier(finalTigers);
                 if (multiplier > 0) {
@@ -137,6 +347,7 @@
             }
         }, 70);
     }
+
     spinBtn.addEventListener('click', spin);
     renderReels();
 </script>
