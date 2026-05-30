@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         * {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
         body {
             background: #0a0a12;
@@ -17,54 +15,33 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: system-ui, sans-serif;
-            padding: 20px;
         }
-        /* 三个板块垂直排列 */
         .app {
             width: 500px;
             background: #0f0f1a;
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 2px 3px rgba(0,0,0,0.5);
         }
-        /* 板块1: 500x375 */
         .panel-top {
             width: 500px;
             height: 375px;
             background: #1a1a2a;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-bottom: 1px solid #ffd96633;
         }
-        
-        /* 板块2: 500x281 */
         .panel-mid {
             width: 500px;
             height: 281px;
             background: #13131f;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 20px;
-            border-bottom: 1px solid #ffd96633;
-        
-        /* 板块3: 500x282 */
+        }
         .panel-bottom {
             width: 500px;
             height: 282px;
             background: #1a1a2a;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 16px;
-            padding: 20px;
         }
-        .spin randomTiger());
-    updateUI();
-</script>
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="panel-top"></div>
+    <div class="panel-mid"></div>
+    <div class="panel-bottom"></div>
+</div>
 </body>
 </html>
