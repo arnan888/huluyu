@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 功能区域适配</title>
+    <title>老虎机 | 向下单向滚动 永不后退</title>
     <style>
         * {
             margin: 0;
@@ -47,20 +46,18 @@
             justify-content: center;
             align-items: center;
             gap: 12px;
-            /* 移除任何可能干扰的样式 */
-            box-shadow: none;
-            border: none;
         }
         .reel {
             width: 90px;
             height: 120px;
             background: rgba(0,0,0,0.5);
             overflow: hidden;
+            position: relative;
         }
         .reel-strip {
             display: flex;
             flex-direction: column;
-            transition: transform 0.05s linear;
+            will-change: transform;
         }
         .reel-item {
             width: 90px;
@@ -84,7 +81,6 @@
             pointer-events: none;
             transform: translateY(-50%);
         }
-        /* 底部功能区域布局 - 适配背景图设计 */
         .info {
             display: flex;
             justify-content: space-around;
@@ -95,13 +91,8 @@
             font-size: 0.8rem;
             text-align: center;
         }
-        .info div {
-            flex: 1;
-        }
-        .info span {
-            font-weight: bold;
-            margin-left: 4px;
-        }
+        .info div { flex: 1; }
+        .info span { font-weight: bold; margin-left: 4px; }
         .bet {
             display: flex;
             align-items: center;
@@ -120,9 +111,7 @@
             color: #ffd966;
             cursor: pointer;
         }
-        .bet button:active {
-            transform: translateY(1px);
-        }
+        .bet button:active { transform: translateY(1px); }
         .bet span {
             font-size: 1.2rem;
             font-weight: bold;
@@ -141,13 +130,8 @@
             cursor: pointer;
             margin-top: 4px;
         }
-        .spin:active {
-            transform: translateY(2px);
-        }
-        /* 强制无圆角 */
-        .reel, .info, .bet, .spin, .panel-top, .panel-mid, .panel-bottom {
-            border-radius: 0px;
-        }
+        .spin:active { transform: translateY(2px); }
+        .reel, .info, .bet, .spin, .panel-top, .panel-mid, .panel-bottom { border-radius: 0px; }
     </style>
 </head>
 <body>
@@ -175,6 +159,7 @@
 </div>
 
 <script>
+    // ----- 老虎数据 -----
     const TIGERS = {
         green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
         red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
@@ -184,109 +169,121 @@
     function rand() { return LIST[Math.floor(Math.random()*3)]; }
     function makeStrip() { return [rand(), rand(), rand()]; }
 
+    // 每个转轴的数据：3个老虎（上中下） 和 当前显示的偏移索引（0上,1中,2下）
     let strips = [makeStrip(), makeStrip(), makeStrip()];
-    let offsets = [1,1,1];
+    let offsets = [1, 1, 1];
     let balance = 1000, score = 0, bet = 20;
     let spinning = false;
 
-    const stripDivs = [document.getElementById('strip0'), document.getElementById('strip1'), document.getElementById('strip2')];
-    const balanceSpan = document.getElementById('balance');
-    const scoreSpan = document.getElementById('score');
-    const betAmountSpan = document.getElementById('betAmount');
-    const betValueSpan = document.getElementById('betValue');
-    const minusBtn = document.getElementById('minus');
-    const plusBtn = document.getElementById('plus');
-    const spinBtn = document.getElementById('spinBtn');
+    const stripDivs = [
+        document.getElementById('strip0'),
+        document.getElementById('strip1'),
+        document.getElementById('strip2')
+    ];
 
-    function renderReel(i) {
-        const s = strips[i];
-        const div = stripDivs[i];
-        div.innerHTML = '';
-        for(let j=0;j<3;j++) {
+    // 渲染单个转轴
+    function renderReel(idx) {
+        const s = strips[idx];
+        const container = stripDivs[idx];
+        container.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
             const item = document.createElement('div');
             item.className = 'reel-item';
             const img = document.createElement('img');
             img.className = 'reel-img';
-            img.src = s[j].img;
+            img.src = s[i].img;
             item.appendChild(img);
-            div.appendChild(item);
+            container.appendChild(item);
         }
-        div.style.transform = `translateY(${-offsets[i]*120}px)`;
+        // 根据偏移量平移：每个item高120px
+        container.style.transform = `translateY(${-offsets[idx] * 120}px)`;
     }
 
     function updateUI() {
-        balanceSpan.innerText = balance;
-        scoreSpan.innerText = score;
-        betAmountSpan.innerText = bet;
-        betValueSpan.innerText = bet;
+        document.getElementById('balance').innerText = balance;
+        document.getElementById('score').innerText = score;
+        document.getElementById('betAmount').innerText = bet;
+        document.getElementById('betValue').innerText = bet;
+    }
+
+    // 单向向下滚动动画（永不回头）
+    // 原理：不停增加偏移量，模3递增，并且每次增加时重新渲染，形成连续向下的感觉
+    // 停止时直接跳转到最终偏移，不会回退
+    function animateReel(idx, durationMs, finalOffset, finalStrip) {
+        return new Promise((resolve) => {
+            const startTime = performance.now();
+            const totalSteps = 24;          // 总滚动步数
+            let step = 0;
+            let currentOffset = offsets[idx];
+
+            function stepAnimation() {
+                if (step >= totalSteps) {
+                    // 结束：直接硬设最终结果（无回退）
+                    strips[idx] = finalStrip;
+                    offsets[idx] = finalOffset;
+                    renderReel(idx);
+                    resolve();
+                    return;
+                }
+                // 向下滚动：偏移量 +1 (模3)
+                currentOffset = (currentOffset + 1) % 3;
+                offsets[idx] = currentOffset;
+                renderReel(idx);
+                step++;
+                // 根据时间总长分配每一帧的延迟，使其在durationMs内完成
+                const delay = durationMs / totalSteps;
+                setTimeout(stepAnimation, delay);
+            }
+            stepAnimation();
+        });
     }
 
     async function spin() {
-        if(spinning) return;
-        if(balance < bet) { alert('余额不足'); return; }
+        if (spinning) return;
+        if (balance < bet) {
+            alert('余额不足');
+            return;
+        }
         spinning = true;
         balance -= bet;
         updateUI();
 
+        // 预先生成最终结果
         const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
-        const finalOffsets = [1,1,1];
-        const delays = [0, 500, 1000];
-        let done = 0;
+        const finalOffsets = [1, 1, 1];  // 最终都停在中间位置
+        // 每个转轴滚动时长：左 600ms，中 900ms，右 1200ms（实现依次停止）
+        const durations = [600, 900, 1200];
 
-        function startReel(idx, delay) {
-            setTimeout(() => {
-                let frames = 0;
-                const maxFrames = 12;
-                function step() {
-                    if(frames < maxFrames) {
-                        offsets[idx] = (offsets[idx] + 1) % 3;
-                        renderReel(idx);
-                        frames++;
-                        requestAnimationFrame(step);
-                    } else {
-                        strips[idx] = finalStrips[idx];
-                        offsets[idx] = finalOffsets[idx];
-                        renderReel(idx);
-                        done++;
-                        if(done === 3) {
-                            const t0 = strips[0][1];
-                            const t1 = strips[1][1];
-                            const t2 = strips[2][1];
-                            let mult = (t0.color===t1.color && t1.color===t2.color) ? t0.mult : 8;
-                            let win = bet * mult;
-                            if(win>0) {
-                                balance += win;
-                                score += win;
-                                // 无弹窗
-                            }
-                            updateUI();
-                            spinning = false;
-                        }
-                    }
-                }
-                step();
-            }, delay);
+        // 并行执行三个动画，但使用 Promise.all 等待全部完成
+        const promises = [];
+        for (let i = 0; i < 3; i++) {
+            promises.push(animateReel(i, durations[i], finalOffsets[i], finalStrips[i]));
         }
+        await Promise.all(promises);
 
-        startReel(0, delays[0]);
-        startReel(1, delays[1]);
-        startReel(2, delays[2]);
+        // 结算中奖
+        const t0 = strips[0][1];
+        const t1 = strips[1][1];
+        const t2 = strips[2][1];
+        let mult = (t0.color === t1.color && t1.color === t2.color) ? t0.mult : 8;
+        let win = bet * mult;
+        if (win > 0) {
+            balance += win;
+            score += win;
+            // 无弹窗（用户要求删除）
+        }
+        updateUI();
+        spinning = false;
     }
 
-    minusBtn.onclick = () => { if(bet>10) { bet-=10; updateUI(); } };
-    plusBtn.onclick = () => { if(bet<500) { bet+=10; updateUI(); } };
-    spinBtn.onclick = spin;
+    // 绑定事件
+    document.getElementById('minus').onclick = () => { if (bet > 10) { bet -= 10; updateUI(); } };
+    document.getElementById('plus').onclick  = () => { if (bet < 500) { bet += 10; updateUI(); } };
+    document.getElementById('spinBtn').onclick = spin;
 
-    for(let i=0;i<3;i++) renderReel(i);
+    // 初始化渲染
+    for (let i = 0; i < 3; i++) renderReel(i);
     updateUI();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
