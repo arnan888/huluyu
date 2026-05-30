@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 无弹窗</title>
+    <title>老虎机 | 纯背景图</title>
     <style>
         * {
             margin: 0;
@@ -19,47 +19,44 @@
             align-items: center;
             min-height: 100vh;
         }
+        /* 主容器：固定宽500，高100vh，无额外背景色或阴影 */
         .app {
             width: 500px;
             height: 100vh;
-            background: #0f0f1a;
             display: flex;
             flex-direction: column;
-            box-shadow: inset 0 0 0 2px #2a2a3a, 0 10px 20px rgba(0,0,0,0.5);
         }
+        /* 上板块：背景图，尺寸覆盖，无额外颜色 */
         .panel-top {
-            flex: 36.5;
+            flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
-            border-bottom: 1px solid #2a2a3a;
-            box-shadow: inset 0 0 0 1px #3a3a4a;
         }
+        /* 中板块：背景图，内嵌滚轮区域 */
         .panel-mid {
-            flex: 27.1;
+            flex: 28.1;
             background: url('slot-mid.png') center/cover no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 16px;
             position: relative;
-            border-bottom: 1px solid #2a2a3a;
-            box-shadow: inset 0 0 0 1px #3a3a4a;
         }
+        /* 下板块：背景图 */
         .panel-bottom {
-            flex: 33.4;
+            flex: 34.4;
             background: url('slot-bottom.jpg') center/cover no-repeat;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             gap: 12px;
-            box-shadow: inset 0 0 0 1px #3a3a4a;
         }
+        /* 滚轮容器：纯黑半透明底，无圆角 */
         .reel {
-            width: 130px;
+            width: 90px;
             height: 120px;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
             overflow: hidden;
-            box-shadow: inset 0 0 0 2px #ffd96688, 0 2px 6px black;
         }
         .reel-strip {
             display: flex;
@@ -67,17 +64,18 @@
             transition: transform 0.05s linear;
         }
         .reel-item {
-            width: 120px;
+            width: 90px;
             height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .reel-img {
-            width: 120px;
-            height: 120px;
+            width: 75px;
+            height: 75px;
             object-fit: contain;
         }
+        /* 中奖线：纯渐变，无阴影 */
         .win-line {
             position: absolute;
             top: 50%;
@@ -87,27 +85,26 @@
             background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
             pointer-events: none;
             transform: translateY(-50%);
-            box-shadow: 0 0 4px #ffaa66;
         }
+        /* 信息区：半透黑底，无边框圆角 */
         .info {
             display: flex;
             gap: 20px;
-            background: rgba(0,0,0,0.65);
+            background: rgba(0,0,0,0.6);
             padding: 8px 20px;
             color: #ffd966;
             font-size: 0.8rem;
-            border: 1px solid #3a3a4a;
         }
         .info span {
             font-weight: bold;
             margin-left: 6px;
         }
+        /* 押分栏 */
         .bet {
             display: flex;
             gap: 15px;
-            background: rgba(0,0,0,0.65);
+            background: rgba(0,0,0,0.6);
             padding: 5px 16px;
-            border: 1px solid #3a3a4a;
         }
         .bet button {
             background: #2a2a3a;
@@ -119,9 +116,12 @@
             color: #ffd966;
             cursor: pointer;
         }
-        .bet button:active { transform: translateY(1px); }
+        .bet button:active {
+            transform: translateY(1px);
+        }
+        /* 旋转按钮 */
         .spin {
-            background: radial-gradient(circle at 30% 20%, #ffcf6e, #be691f);
+            background: #ffcf6e;
             border: none;
             width: 160px;
             padding: 10px 0;
@@ -129,10 +129,11 @@
             font-weight: bold;
             color: #2d1e09;
             cursor: pointer;
-            box-shadow: 0 4px 0 #784818;
-            transition: 0.05s linear;
         }
-        .spin:active { transform: translateY(2px); box-shadow: 0 1px 0 #784818; }
+        .spin:active {
+            transform: translateY(2px);
+        }
+        /* 强制无圆角 */
         .reel, .info, .bet, .spin, .panel-top, .panel-mid, .panel-bottom {
             border-radius: 0px;
         }
@@ -204,11 +205,7 @@
 
     async function spin() {
         if(spinning) return;
-        if(balance < bet) {
-            // 余额不足提示使用 alert 但用户未明确要求删除余额不足提示，但为了保持一致也可以删除？用户只说删除中奖弹窗，余额不足保留吧。但为符合无打扰，也可以静默。按用户要求只删除中奖弹窗。
-            alert('余额不足');
-            return;
-        }
+        if(balance < bet) { alert('余额不足'); return; }
         spinning = true;
         balance -= bet;
         updateUI();
@@ -242,7 +239,7 @@
                             if(win>0) {
                                 balance += win;
                                 score += win;
-                                // 中奖弹窗已删除
+                                // 无弹窗
                             }
                             updateUI();
                             spinning = false;
