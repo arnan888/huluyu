@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 单向转轴 透明按钮</title>
+    <title>老虎机 | 单向运输带 永不摇摆</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* 主容器宽度固定500，高度100vh，三块用flex比例 */
+        /* 主容器固定宽500，高度100vh，三块比例固定 */
         .app {
             width: 500px;
             height: 100vh;
@@ -27,7 +27,6 @@
             flex-direction: column;
             background: #0f0f1a;
         }
-        /* 三大板块：完全由背景图决定，无额外背景色 */
         .panel-top {
             flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
@@ -46,12 +45,13 @@
             background: url('slot-bottom.jpg') center/cover no-repeat;
             position: relative;
         }
-        /* 滚轮样式 - 只负责显示老虎，无额外装饰 */
+        /* 滚轮容器 - 固定尺寸，溢出隐藏 */
         .reel {
-            width: 120px;
+            width: 90px;
             height: 120px;
             background: rgba(0,0,0,0.4);
             overflow: hidden;
+            position: relative;
         }
         .reel-strip {
             display: flex;
@@ -59,29 +59,28 @@
             will-change: transform;
         }
         .reel-item {
-            width: 1px;
+            width: 90px;
             height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .reel-img {
-            width: 110px;
-            height: 110px;
+            width: 75px;
+            height: 75px;
             object-fit: contain;
         }
-        /* 固定中奖线，只做视觉指示 */
         .win-line {
             position: absolute;
             top: 50%;
             left: 0;
             width: 100%;
-            height: 14px;
+            height: 3px;
             background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
             pointer-events: none;
             transform: translateY(-50%);
         }
-        /* 信息栏：余额/得分/总押分 - 置于底部板块上部 */
+        /* 信息栏 - 透明文字悬浮 */
         .info-bar {
             position: absolute;
             top: 18%;
@@ -99,7 +98,7 @@
             font-size: 1.1rem;
             margin-left: 5px;
         }
-        /* 底部控制区 - 完全透明按钮，精确覆盖背景图设计位置 */
+        /* 底部按钮组 - 完全透明，无背景无边框 */
         .button-panel {
             position: absolute;
             bottom: 12%;
@@ -128,9 +127,7 @@
             min-width: 48px;
             transition: 0.05s linear;
         }
-        .trans-btn:active {
-            transform: scale(0.96);
-        }
+        .trans-btn:active { transform: scale(0.96); }
         .big-spin {
             background: transparent;
             border: none;
@@ -141,13 +138,8 @@
             cursor: pointer;
             padding: 8px 20px;
         }
-        .big-spin:active {
-            transform: scale(0.96);
-        }
-        .adj-btn {
-            font-size: 1.4rem;
-            padding: 8px 14px;
-        }
+        .big-spin:active { transform: scale(0.96); }
+        .adj-btn { font-size: 1.4rem; padding: 8px 14px; }
         /* 历史弹窗 */
         .history-modal {
             position: fixed;
@@ -216,151 +208,185 @@
 </div>
 
 <script>
-    // ----- 老虎数据 -----
-    const TIGERS = {
-        green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
-        red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
-        gold:  { name:'金虎', color:'gold',  img:'tiger-gold.png',  mult:88 }
-    };
-    const LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
-    function rand() { return LIST[Math.floor(Math.random()*3)]; }
-    function makeStrip() { return [rand(), rand(), rand()]; }
+    (function(){
+        // ------------------- 老虎数据 -------------------
+        const TIGERS = {
+            green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
+            red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
+            gold:  { name:'金虎', color:'gold',  img:'tiger-gold.png',  mult:88 }
+        };
+        const LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
+        function rand() { return LIST[Math.floor(Math.random()*3)]; }
+        function makeStrip() { return [rand(), rand(), rand()]; }
 
-    let strips = [makeStrip(), makeStrip(), makeStrip()];
-    let offsets = [1, 1, 1];      // 当前显示中间索引
-    let balance = 1000, score = 0, bet = 20;
-    let spinning = false;
-    let autoFlag = false;
-    let speedFactor = 1;           // 1正常，0.5加速
+        // 每个转轴的状态：strip 三张图片，offset 当前显示的索引（0,1,2）
+        let strips = [makeStrip(), makeStrip(), makeStrip()];
+        let offsets = [1, 1, 1];   // 起始都显示中间
+        let balance = 1000, score = 0, bet = 20;
+        let spinning = false;
+        let autoFlag = false;
+        let speedFactor = 1;       // 1正常，0.5加速
 
-    const stripDivs = [
-        document.getElementById('strip0'),
-        document.getElementById('strip1'),
-        document.getElementById('strip2')
-    ];
+        // DOM 元素
+        const stripDivs = [
+            document.getElementById('strip0'),
+            document.getElementById('strip1'),
+            document.getElementById('strip2')
+        ];
+        const balanceSpan = document.getElementById('balance');
+        const scoreSpan = document.getElementById('score');
+        const totalBetSpan = document.getElementById('totalBet');
+        const spinBtn = document.getElementById('spinBtn');
+        const minusBtn = document.getElementById('minusBet');
+        const plusBtn = document.getElementById('plusBet');
+        const speedBtn = document.getElementById('speedBtn');
+        const autoBtn = document.getElementById('autoBtn');
+        const historyBtn = document.getElementById('historyBtn');
+        const modal = document.getElementById('historyModal');
+        const historyList = document.getElementById('historyList');
+        const closeHistory = document.getElementById('closeHistory');
 
-    function renderReel(idx) {
-        const s = strips[idx];
-        const cont = stripDivs[idx];
-        cont.innerHTML = '';
-        for (let i = 0; i < 3; i++) {
-            const item = document.createElement('div');
-            item.className = 'reel-item';
-            const img = document.createElement('img');
-            img.className = 'reel-img';
-            img.src = s[i].img;
-            item.appendChild(img);
-            cont.appendChild(item);
-        }
-        cont.style.transform = `translateY(${-offsets[idx] * 120}px)`;
-    }
+        let historyRecords = [];
 
-    function updateUI() {
-        document.getElementById('balance').innerText = balance;
-        document.getElementById('score').innerText = score;
-        document.getElementById('totalBet').innerText = bet;
-    }
-
-    // 单向向下滚动（永不回头）
-    function animateReel(idx, baseDuration, finalOffset, finalStrip) {
-        const duration = baseDuration * speedFactor;
-        return new Promise((resolve) => {
-            let step = 0;
-            const steps = 20;
-            let curOff = offsets[idx];
-            const delay = duration / steps;
-            function tick() {
-                if (step >= steps) {
-                    strips[idx] = finalStrip;
-                    offsets[idx] = finalOffset;
-                    renderReel(idx);
-                    resolve();
-                    return;
-                }
-                curOff = (curOff + 1) % 3;
-                offsets[idx] = curOff;
-                renderReel(idx);
-                step++;
-                setTimeout(tick, delay);
+        // 渲染单个转轴（根据当前 strips 和 offsets）
+        function renderReel(idx) {
+            const s = strips[idx];
+            const container = stripDivs[idx];
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const item = document.createElement('div');
+                item.className = 'reel-item';
+                const img = document.createElement('img');
+                img.className = 'reel-img';
+                img.src = s[i].img;
+                item.appendChild(img);
+                container.appendChild(item);
             }
-            tick();
-        });
-    }
-
-    // 历史记录
-    let historyList = [];
-    const historyUl = document.getElementById('historyList');
-    function addHistory(msg) {
-        historyList.unshift(msg);
-        if (historyList.length > 20) historyList.pop();
-        historyUl.innerHTML = '';
-        historyList.forEach(h => {
-            const li = document.createElement('li');
-            li.textContent = h;
-            historyUl.appendChild(li);
-        });
-    }
-
-    async function spin() {
-        if (spinning) return;
-        if (balance < bet) {
-            if (autoFlag) autoFlag = false;
-            alert('余额不足');
-            return;
+            container.style.transform = `translateY(${-offsets[idx] * 120}px)`;
         }
-        spinning = true;
-        balance -= bet;
+
+        function updateUI() {
+            balanceSpan.innerText = balance;
+            scoreSpan.innerText = score;
+            totalBetSpan.innerText = bet;
+        }
+
+        function addHistory(msg) {
+            historyRecords.unshift(msg);
+            if (historyRecords.length > 20) historyRecords.pop();
+            historyList.innerHTML = '';
+            historyRecords.forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                historyList.appendChild(li);
+            });
+        }
+
+        // 核心滚动：单向运输带，绝不摇摆
+        // 参数：转轴索引，滚动持续时间(ms)，最终要显示的图片strip和偏移
+        function startRolling(idx, duration, finalStrip, finalOffset) {
+            return new Promise((resolve) => {
+                const startTime = performance.now();
+                const startOffset = offsets[idx];
+                // 滚动需要经过的“步数”  (向下移动，偏移值不断增加)
+                // 我们要让最终偏移等于 finalOffset，但滚动期间只加不减。
+                // 因为 finalOffset 只能是 0,1,2，而 startOffset 也是其中之一。
+                // 为了让滚动有足够圈数，我们让滚动总步数 = 12 + (finalOffset - startOffset + 3) % 3
+                // 确保最后停在 finalOffset
+                let stepsNeeded = 12 + ((finalOffset - startOffset + 3) % 3);
+                let step = 0;
+                let currentOff = startOffset;
+                // 每步的时间间隔
+                const stepDuration = duration / stepsNeeded;
+                
+                function stepRoll(timestamp) {
+                    if (step >= stepsNeeded) {
+                        // 最终硬设，无过渡，保证无回退
+                        strips[idx] = finalStrip;
+                        offsets[idx] = finalOffset;
+                        renderReel(idx);
+                        resolve();
+                        return;
+                    }
+                    // 向下移动一步
+                    currentOff = (currentOff + 1) % 3;
+                    offsets[idx] = currentOff;
+                    renderReel(idx);
+                    step++;
+                    setTimeout(() => requestAnimationFrame(stepRoll), stepDuration);
+                }
+                // 启动动画
+                setTimeout(() => requestAnimationFrame(stepRoll), 0);
+            });
+        }
+
+        // 主旋转流程
+        async function spin() {
+            if (spinning) return;
+            if (balance < bet) {
+                if (autoFlag) autoFlag = false;
+                alert('余额不足');
+                return;
+            }
+            spinning = true;
+            balance -= bet;
+            updateUI();
+
+            // 预先生成最终结果
+            const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
+            const finalOffsets = [1, 1, 1];   // 最终都停在中间位置
+            // 左中右依次停止时间 (ms) 依次增加，实现顺序停止
+            const durations = [600, 900, 1200].map(d => d * speedFactor);
+            
+            const promises = [];
+            for (let i = 0; i < 3; i++) {
+                promises.push(startRolling(i, durations[i], finalStrips[i], finalOffsets[i]));
+            }
+            await Promise.all(promises);
+            
+            // 结算
+            const t0 = strips[0][1];
+            const t1 = strips[1][1];
+            const t2 = strips[2][1];
+            let mult = (t0.color === t1.color && t1.color === t2.color) ? t0.mult : 8;
+            let win = bet * mult;
+            if (win > 0) {
+                balance += win;
+                score += win;
+                addHistory(`🎉中奖 +${win} (${mult}倍) ${t0.name} ${t1.name} ${t2.name}`);
+            } else {
+                addHistory(`😞未中奖 ${t0.name} ${t1.name} ${t2.name}`);
+            }
+            updateUI();
+            spinning = false;
+            if (autoFlag && balance >= bet) {
+                setTimeout(() => spin(), 200);
+            } else if (autoFlag && balance < bet) {
+                autoFlag = false;
+                autoBtn.innerText = '🔄自动';
+            }
+        }
+
+        // 事件绑定
+        minusBtn.onclick = () => { if (bet > 10) { bet -= 10; updateUI(); } };
+        plusBtn.onclick = () => { if (bet < 500) { bet += 10; updateUI(); } };
+        spinBtn.onclick = () => { if (!spinning) spin(); };
+        speedBtn.onclick = () => {
+            speedFactor = speedFactor === 1 ? 0.5 : 1;
+            speedBtn.innerText = speedFactor === 1 ? '⚡加速' : '🐢正常';
+        };
+        autoBtn.onclick = () => {
+            autoFlag = !autoFlag;
+            autoBtn.innerText = autoFlag ? '⏸停止' : '🔄自动';
+            if (autoFlag && !spinning && balance >= bet) spin();
+        };
+        historyBtn.onclick = () => modal.classList.add('show');
+        closeHistory.onclick = () => modal.classList.remove('show');
+
+        // 初始化
+        for (let i = 0; i < 3; i++) renderReel(i);
         updateUI();
-
-        const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
-        const finalOffsets = [1, 1, 1];
-        const baseDurs = [600, 900, 1200];
-        const promises = [];
-        for (let i = 0; i < 3; i++) {
-            promises.push(animateReel(i, baseDurs[i], finalOffsets[i], finalStrips[i]));
-        }
-        await Promise.all(promises);
-
-        const t0 = strips[0][1], t1 = strips[1][1], t2 = strips[2][1];
-        let mult = (t0.color === t1.color && t1.color === t2.color) ? t0.mult : 8;
-        let win = bet * mult;
-        if (win > 0) {
-            balance += win;
-            score += win;
-            addHistory(`🎉中奖 +${win} (${mult}倍) ${t0.name} ${t1.name} ${t2.name}`);
-        } else {
-            addHistory(`😞未中奖 ${t0.name} ${t1.name} ${t2.name}`);
-        }
-        updateUI();
-        spinning = false;
-        if (autoFlag && balance >= bet) setTimeout(() => spin(), 200);
-        else if (autoFlag && balance < bet) autoFlag = false;
-    }
-
-    // 绑定透明按钮
-    document.getElementById('minusBet').onclick = () => { if (bet > 10) { bet -= 10; updateUI(); } };
-    document.getElementById('plusBet').onclick  = () => { if (bet < 500) { bet += 10; updateUI(); } };
-    document.getElementById('spinBtn').onclick = () => { if (!spinning) spin(); };
-    document.getElementById('speedBtn').onclick = () => {
-        speedFactor = speedFactor === 1 ? 0.5 : 1;
-        document.getElementById('speedBtn').innerText = speedFactor === 1 ? '⚡加速' : '🐢正常';
-    };
-    document.getElementById('autoBtn').onclick = () => {
-        autoFlag = !autoFlag;
-        document.getElementById('autoBtn').innerText = autoFlag ? '⏸停止' : '🔄自动';
-        if (autoFlag && !spinning && balance >= bet) spin();
-    };
-    const modal = document.getElementById('historyModal');
-    document.getElementById('historyBtn').onclick = () => modal.classList.add('show');
-    document.getElementById('closeHistory').onclick = () => modal.classList.remove('show');
-
-    for (let i = 0; i < 3; i++) renderReel(i);
-    updateUI();
+    })();
 </script>
 </body>
 </html>
-
-
-
-
-
