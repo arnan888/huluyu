@@ -1,40 +1,8 @@
-ton id="floatToggle" style="width:48px;height:48px;background:rgba(255,170,51,0.9);color:#1a1a0a;border:none;border-radius:50%;font-size:20px;cursor:pointer">☰</button>
-  `;
-  document.body.appendChild(container);
-  document.getElementById('floatToggle').onclick = function() {
-    const menu = document.getElementById('floatMenu');
-    if (menu.style.display === 'none' || !menu.style.display) {
-      menu.style.display = 'flex';
-      this.innerText = '✕';
-    } else {
-      menu.style.display = 'none';
-      this.innerText = '☰';
-    }
-  };
-}
-
-// ---------- 启动 ----------
-(async function init() {
-  const saved = localStorage.getItem('cu');
-  if (saved) {
-    try {
-      const u = JSON.parse(saved);
-      const res = await apiCall('GET', `/user/${u.account}/profile`);
-      currentUser = res.user;
-      createFloatingButtons();
-      renderGame();
-    } catch (e) {
-      localStorage.removeItem('cu');
-      alert('请先登录'); location.href = '/';
-    }
-  } else {
-    alert('请先登录'); location.href = '/';
-  }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>三槽帝王 | 定制尺寸</title>
     <style>
         * {
             user-select: none;
@@ -43,433 +11,59 @@ ton id="floatToggle" style="width:48px;height:48px;background:rgba(255,170,51,0.
             margin: 0;
             padding: 0;
         }
-
         body {
+            background: #0a0a12;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-image: url('bg.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            font-family: system-ui, sans-serif;
+            padding: 20px;
         }
-
+        /* 三个板块垂直排列 */
         .app {
             width: 500px;
-            height: 800px;
-            display: flex;
-            flex-direction: column;
-            background:;
-        }
-
-
-        .game-title {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .game-title h1 {
-            color: #000000;
-            font-size: 1.8rem;
-            text-shadow: 0 0 10px #ff6600;
-        }
-
-        .jackpot-area {
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            border-radius: 30px;
-            padding: 10px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .jackpot-value {
-            color: #ffd700;
-            font-size: 1.6rem;
-            font-weight: bold;
-        }
-
-        .guide-text {
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            border-radius: 20px;
-            padding: 8px;
-            display: flex;
-            justify-content: space-around;
-            font-size: 0.75rem;
-            color: #ddccaa;
-        }
-
-        /* 开奖三个槽位底板 - 新尺寸 */
-        .slot-top {
-            width: 500px;
-            height: 3000px;
-            background-image: url('slot-top.png');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-        }
-        .slot-mid {
-            width: 500px;
-            height: 300px;
-            background-image: url('slot-mid.png');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-        }
-        .slot-bottom {
-            width: 500px;
-            height: 300px;
-            background-image: url('slot-bottom.png');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-        }
-
-        .slot-left, .slot-right {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .tiger-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .tiger-img {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-        }
-
-        /* 上槽位：只显示上半部分 */
-        .slot-top .tiger-wrapper {
-            height: 75px;
+            background: #0f0f1a;
+            border-radius: 4px;
             overflow: hidden;
-            align-items: flex-start;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.5);
         }
-        /* 中槽位：完整显示 */
-        .slot-mid .tiger-wrapper {
-            height: 150px;
-            overflow: visible;
-        }
-        /* 下槽位：只显示下半部分 */
-        .slot-bottom .tiger-wrapper {
-            height: 75px;
-            overflow: hidden;
-            align-items: flex-end;
-        }
-
-        /* 中奖线（固定在中槽位后面） */
-        .win-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 4px;
-           
-            box-shadow: 0 0 1px #ffaa66;
-            transform: translateY(-50%);
-            z-index: 5;
-            pointer-events: none;
-        }
-
-        /* 底部操控区 250px */
-        .bottom-area {
-            height: 500px;
-            padding: 200px;
+        /* 板块1: 500x375 */
+        .panel-top {
+            width: 500px;
+            height: 375px;
+            background: #1a1a2a;
             display: flex;
             flex-direction: column;
-            background: transparent;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid #ffd96633;
         }
-
-        .stats-row {
-            display: flex;
-            gap: 10px;
-            height: 70px;
-            margin-bottom: 15px;
-        }
-        .stat-box {
-            flex: 1;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            border-radius: 20px;
+        
+        /* 板块2: 500x281 */
+        .panel-mid {
+            width: 500px;
+            height: 281px;
+            background: #13131f;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-        }
-        .stat-label {
-            font-size: 0.7rem;
-            color: #ffcc88;
-        }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ffd700;
-        }
-
-        .buttons-row {
+            padding: 0 20px;
+            border-bottom: 1px solid #ffd96633;
+        
+        /* 板块3: 500x282 */
+        .panel-bottom {
+            width: 500px;
+            height: 282px;
+            background: #1a1a2a;
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .small-btn {
-            flex: 1;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            border: 1px solid #ffd70066;
-            padding: 8px 0;
-            border-radius: 40px;
-            color: #ffdd99;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .small-btn:active { transform: scale(0.97); }
-
-        .main-button-area {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            gap: 20px;
-        }
-        .adjust-btn {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.7);
-            border: 2px solid #ffd700;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #ffd700;
-            cursor: pointer;
-        }
-        .adjust-btn:active { transform: scale(0.95); }
-
-        .spin-main {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #2a8a4a, #0a4a2a);
-            border: 4px solid #ffd700;
-            box-shadow: 0 0 20px #ffd70066;
-            cursor: pointer;
-            display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;
-        }
-        .spin-main:active { transform: scale(0.96); }
-
-        /* 历史弹窗 */
-        .history-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            visibility: hidden;
-        }
-        .history-modal.show { visibility: visible; }
-        .history-content {
-            background: #1e1e2e;
-            border-radius: 40px;
+            gap: 16px;
             padding: 20px;
-            width: 400px;
-            max-height: 500px;
-            overflow-y: auto;
-            border: 2px solid #ffd700;
         }
-        .history-list {
-            list-style: none;
-            padding: 0;
-        }
-        .history-list li {
-            padding: 8px;
-            border-bottom: 1px solid #ffd70044;
-            color: #ffdd99;
-        }
-        .close-history {
-            margin-top: 15px;
-            padding: 8px;
-            background: #ffd700;
-            border: none;
-            border-radius: 30px;
-            width: 100%;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-<div class="app">
-    <div class="top-area">
-        <div class="game-title">
-            <h1></h1>
-        </div>
-        <div class="jackpot-area">
-            <div class="jackpot-label">💎 大奖池 💎</div>
-            <div class="jackpot-value" id="jackpot">8888</div>
-        </div>
-        <div class="guide-text">
-            <span>🐯 绿虎 28倍</span> <span>🐅 红虎 58倍</span> <span>👑 金虎 88倍</span>
-        </div>
-    </div>
-
-    <div class="middle-area" id="middleArea">
-        <div class="slot-top" id="slotTop">
-            <div class="slot-left"><div class="tiger-wrapper"><img class="tiger-img" id="topLeftImg" src="tiger-green.png"></div></div>
-            <div class="slot-right"><div class="tiger-wrapper"><img class="tiger-img" id="topRightImg" src="tiger-green.png"></div></div>
-        </div>
-        <div class="slot-mid" id="slotMid">
-            <div class="slot-left"><div class="tiger-wrapper"><img class="tiger-img" id="midLeftImg" src="tiger-green.png"></div></div>
-            <div class="slot-right"><div class="tiger-wrapper"><img class="tiger-img" id="midRightImg" src="tiger-green.png"></div></div>
-        </div>
-        <div class="slot-bottom" id="slotBottom">
-            <div class="slot-left"><div class="tiger-wrapper"><img class="tiger-img" id="bottomLeftImg" src="tiger-green.png"></div></div>
-            <div class="slot-right"><div class="tiger-wrapper"><img class="tiger-img" id="bottomRightImg" src="tiger-green.png"></div></div>
-        </div>
-        <div class="win-line"></div>
-    </div>
-
-    <div class="bottom-area">
-        <div class="stats-row">
-            <div class="stat-box"><span class="stat-label">💰 余额</span><span class="stat-value" id="balance">1000</span></div>
-            <div class="stat-box"><span class="stat-label">🏆 得分</span><span class="stat-value" id="score">0</span></div>
-            <div class="stat-box"><span class="stat-label">🎲 押分</span><span class="stat-value" id="totalBet">20</span></div>
-        </div>
-        <div class="buttons-row">
-            <button class="small-btn" id="historyBtn">📜 记录</button>
-            <button class="small-btn" id="speedBtn">⚡ 加速</button>
-            <button class="small-btn" id="autoBtn">🔄 自动</button>
-        </div>
-        <div class="main-button-area">
-            <button class="adjust-btn" id="minusBet">−</button>
-            <div class="spin-main" id="spinBtn">🎰</div>
-            <button class="adjust-btn" id="plusBet">+</button>
-        </div>
-    </div>
-</div>
-
-<div id="historyModal" class="history-modal">
-    <div class="history-content">
-        <h3 style="color:#ffd700">📜 开奖记录</h3>
-        <ul class="history-list" id="historyList"></ul>
-        <button class="close-history" id="closeHistory">关闭</button>
-    </div>
-</div>
-
-<script>
-    const TIGERS = {
-        green: { name: '绿虎', color: 'green', img: 'tiger-green.png', multiplier: 28 },
-        red:   { name: '红虎', color: 'red', img: 'tiger-red.png', multiplier: 58 },
-        gold:  { name: '金虎', color: 'gold', img: 'tiger-gold.png', multiplier: 88 }
-    };
-    const TIGER_LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
-    function randomTiger() { return TIGER_LIST[Math.floor(Math.random() * 3)]; }
-
-    let leftTop = TIGERS.green, leftMid = TIGERS.green, leftBottom = TIGERS.green;
-    let rightTop = TIGERS.green, rightMid = TIGERS.green, rightBottom = TIGERS.green;
-    let balance = 1000, currentScore = 0, betAmount = 20;
-    let isSpinning = false, autoSpin = false, spinSpeed = 70;
-    let historyRecords = [];
-
-    const topLeftImg = document.getElementById('topLeftImg');
-    const topRightImg = document.getElementById('topRightImg');
-    const midLeftImg = document.getElementById('midLeftImg');
-    const midRightImg = document.getElementById('midRightImg');
-    const bottomLeftImg = document.getElementById('bottomLeftImg');
-    const bottomRightImg = document.getElementById('bottomRightImg');
-    const balanceSpan = document.getElementById('balance');
-    const scoreSpan = document.getElementById('score');
-    const totalBetSpan = document.getElementById('totalBet');
-    const spinBtn = document.getElementById('spinBtn');
-    const minusBetBtn = document.getElementById('minusBet');
-    const plusBetBtn = document.getElementById('plusBet');
-    const speedBtn = document.getElementById('speedBtn');
-    const autoBtn = document.getElementById('autoBtn');
-    const historyBtn = document.getElementById('historyBtn');
-    const historyModal = document.getElementById('historyModal');
-    const historyList = document.getElementById('historyList');
-    const closeHistory = document.getElementById('closeHistory');
-
-    function updateUI() {
-        balanceSpan.innerText = balance;
-        scoreSpan.innerText = currentScore;
-        totalBetSpan.innerText = betAmount;
-        topLeftImg.src = leftTop.img;
-        topRightImg.src = rightTop.img;
-        midLeftImg.src = leftMid.img;
-        midRightImg.src = rightMid.img;
-        bottomLeftImg.src = leftBottom.img;
-        bottomRightImg.src = rightBottom.img;
-    }
-
-    function addHistory(msg) {
-        historyRecords.unshift(msg);
-        if (historyRecords.length > 20) historyRecords.pop();
-        historyList.innerHTML = '';
-        historyRecords.forEach(rec => {
-            const li = document.createElement('li');
-            li.textContent = rec;
-            historyList.appendChild(li);
-        });
-    }
-
-    function calculateWin() { return leftMid.color === rightMid.color ? leftMid.multiplier : 0; }
-
-    function randomAll() {
-        leftTop = randomTiger(); leftMid = randomTiger(); leftBottom = randomTiger();
-        rightTop = randomTiger(); rightMid = randomTiger(); rightBottom = randomTiger();
-    }
-
-    async function spin() {
-        if (isSpinning) return;
-        if (balance < betAmount) { alert('余额不足'); return; }
-        isSpinning = true;
-        balance -= betAmount;
-        updateUI();
-        let count = 0, max = 12;
-        const interval = setInterval(() => {
-            randomAll();
-            updateUI();
-            count++;
-            if (count >= max) {
-                clearInterval(interval);
-                const multiplier = calculateWin();
-                if (multiplier > 0) {
-                    const win = betAmount * multiplier;
-                    balance += win;
-                    currentScore += win;
-                    addHistory(`🎉 中奖 ${win} 分 (${multiplier}倍) ${leftMid.name}+${rightMid.name}`);
-                } else {
-                    addHistory(`😞 未中奖 ${leftMid.name}+${rightMid.name}`);
-                }
-                updateUI();
-                isSpinning = false;
-                if (autoSpin && balance >= betAmount) setTimeout(() => spin(), 300);
-            }
-        }, spinSpeed);
-    }
-
-    spinBtn.addEventListener('click', () => { if (!isSpinning) spin(); });
-    minusBetBtn.addEventListener('click', () => { if (betAmount > 10) betAmount -= 10; totalBetSpan.innerText = betAmount; });
-    plusBetBtn.addEventListener('click', () => { if (betAmount < 500) betAmount += 10; totalBetSpan.innerText = betAmount; });
-    speedBtn.addEventListener('click', () => { spinSpeed = spinSpeed === 70 ? 30 : 70; speedBtn.textContent = spinSpeed === 70 ? '⚡ 加速' : '🐢 正常'; });
-    autoBtn.addEventListener('click', () => { autoSpin = !autoSpin; autoBtn.textContent = autoSpin ? '⏸ 停止' : '🔄 自动'; });
-    historyBtn.addEventListener('click', () => historyModal.classList.add('show'));
-    closeHistory.addEventListener('click', () => historyModal.classList.remove('show'));
-
-    randomAll();
+        .spin randomTiger());
     updateUI();
 </script>
 </body>
