@@ -8,69 +8,15 @@
         body { background: #0a0a12; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .app { width: 500px; }
         .panel-top { width: 500px; height: 375px; background: url('slot-top.jpg') center/cover; }
-        .panel-mid { width: 500px; height: 281px; background: url('slot-mid.png') center/cover; position: relative; display: flex; justify-content: center; align-items: center; }
+        .panel-mid { width: 500px; height: 281px; background: url('slot-mid.png') center/cover; }
         .panel-bottom { width: 500px; height: 282px; background: url('slot-bottom.jpg') center/cover; }
-        .tigers { display: flex; gap: 20px; }
-        .tiger-img { width: 80px; height: 80px; object-fit: contain; }
-        .win-line { position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: gold; transform: translateY(-50%); pointer-events: none; }
-        .info { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 5px; }
-        .info span { color: #ffd966; font-size: 12px; }
-        button { background: #ffcf6e; border: none; padding: 8px 16px; border-radius: 30px; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 <div class="app">
     <div class="panel-top"></div>
-    <div class="panel-mid">
-        <div class="tigers">
-            <img class="tiger-img" id="t0" src="tiger-green.png">
-            <img class="tiger-img" id="t1" src="tiger-green.png">
-            <img class="tiger-img" id="t2" src="tiger-green.png">
-        </div>
-        <div class="win-line"></div>
-        <div class="info"><span>余额:<span id="bal">1000</span></span><span>得分:<span id="scr">0</span></span><span>押分:<span id="bet">20</span></span></div>
-    </div>
-    <div class="panel-bottom" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <div><button id="minus">-</button><span style="margin:0 10px;color:#ffd966;" id="betAmt">20</span><button id="plus">+</button></div>
-        <button id="spin">旋转</button>
-        <div style="font-size:10px;color:#888;">ver</div>
-    </div>
+    <div class="panel-mid"></div>
+    <div class="panel-bottom"></div>
 </div>
-<script>
-    const imgs = ['tiger-green.png','tiger-red.png','tiger-gold.png'];
-    const mul = { 'tiger-green.png':28, 'tiger-red.png':58, 'tiger-gold.png':88 };
-    let balance = 1000, score = 0, bet = 20;
-    const balSpan = document.getElementById('bal');
-    const scrSpan = document.getElementById('scr');
-    const betSpan = document.getElementById('bet');
-    const betAmt = document.getElementById('betAmt');
-    const t0 = document.getElementById('t0'), t1 = document.getElementById('t1'), t2 = document.getElementById('t2');
-    function rnd() { return imgs[Math.floor(Math.random()*3)]; }
-    function updateUI() { balSpan.innerText=balance; scrSpan.innerText=score; betSpan.innerText=bet; betAmt.innerText=bet; }
-    function spin() {
-        if(balance<bet) return alert('余额不足');
-        balance-=bet; updateUI();
-        let c=0, max=10;
-        let iv = setInterval(()=>{
-            t0.src=rnd(); t1.src=rnd(); t2.src=rnd();
-            if(++c>=max){
-                clearInterval(iv);
-                let a=t0.src.split('/').pop(), b=t1.src.split('/').pop(), d=t2.src.split('/').pop();
-                let win = 0;
-                if(a===b && b===d) win = bet * mul[a];
-                else win = bet * 8;
-                if(win>0){
-                    balance+=win; score+=win;
-                    alert('中奖 '+win+' 分');
-                } else alert('未中奖');
-                updateUI();
-            }
-        },70);
-    }
-    document.getElementById('spin').onclick=spin;
-    document.getElementById('minus').onclick=()=>{if(bet>10){bet-=10; updateUI();}};
-    document.getElementById('plus').onclick=()=>{if(bet<500){bet+=10; updateUI();}};
-    updateUI();
-</script>
 </body>
 </html>
