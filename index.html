@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 向下单向滚动 永不后退</title>
+    <title>老虎机 | 完整功能区 透明按钮</title>
     <style>
         * {
             margin: 0;
@@ -24,7 +24,9 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
+        /* 三个面板：背景图全覆盖 */
         .panel-top {
             flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
@@ -41,16 +43,18 @@
         .panel-bottom {
             flex: 34.4;
             background: url('slot-bottom.jpg') center/cover no-repeat;
+            position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-end;  /* 按钮区域靠下 */
             align-items: center;
-            gap: 12px;
+            padding-bottom: 20px;
         }
+        /* 滚轮样式 */
         .reel {
             width: 90px;
             height: 120px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
             overflow: hidden;
             position: relative;
         }
@@ -80,58 +84,136 @@
             background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
             pointer-events: none;
             transform: translateY(-50%);
+            z-index: 2;
         }
-        .info {
+        /* 信息行 (余额、得分、总押分) - 透明无背景，仅文字 */
+        .info-row {
+            position: absolute;
+            top: 15%;
+            left: 0;
+            width: 100%;
             display: flex;
             justify-content: space-around;
-            width: 80%;
-            background: rgba(0,0,0,0.45);
-            padding: 8px 0;
+            padding: 0 30px;
             color: #ffd966;
-            font-size: 0.8rem;
-            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-shadow: 0 0 2px black;
         }
-        .info div { flex: 1; }
-        .info span { font-weight: bold; margin-left: 4px; }
-        .bet {
+        .info-row div {
+            text-align: center;
+            flex: 1;
+        }
+        .info-row span {
+            font-size: 1.1rem;
+            margin-left: 5px;
+        }
+        /* 底部控制区 - 所有按钮透明、无边框、无背景 */
+        .controls {
+            position: absolute;
+            bottom: 15%;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 0 15px;
+        }
+        /* 左右两侧按钮组 */
+        .left-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .right-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        /* 透明按钮样式 */
+        .ctrl-btn {
+            background: transparent;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #ffd966;
+            text-shadow: 0 0 3px black;
+            cursor: pointer;
+            padding: 10px 12px;
+            min-width: 50px;
+            text-align: center;
+            transition: 0.05s linear;
+        }
+        .ctrl-btn:active {
+            transform: scale(0.96);
+        }
+        /* 大旋转按钮 */
+        .spin-big {
+            background: transparent;
+            border: none;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffd966;
+            text-shadow: 0 0 5px black;
+            cursor: pointer;
+            padding: 12px 24px;
+            transition: 0.05s linear;
+        }
+        .spin-big:active {
+            transform: scale(0.96);
+        }
+        /* 加减按钮稍大 */
+        .adj-btn {
+            font-size: 1.4rem;
+            font-weight: bold;
+            min-width: 44px;
+        }
+        /* 历史记录弹窗 */
+        .history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
-            background: rgba(0,0,0,0.45);
-            padding: 8px 20px;
+            z-index: 1000;
+            visibility: hidden;
         }
-        .bet button {
-            background: #2a2a3a;
-            border: none;
-            width: 40px;
-            height: 40px;
-            font-size: 1.4rem;
-            font-weight: bold;
+        .history-modal.show {
+            visibility: visible;
+        }
+        .history-content {
+            background: #1e1e2e;
+            border-radius: 20px;
+            padding: 20px;
+            width: 300px;
+            max-height: 70%;
+            overflow-y: auto;
+            border: 1px solid #ffd966;
             color: #ffd966;
-            cursor: pointer;
         }
-        .bet button:active { transform: translateY(1px); }
-        .bet span {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ffd966;
-            min-width: 60px;
-            text-align: center;
+        .history-list {
+            list-style: none;
+            padding: 0;
+            font-size: 0.8rem;
         }
-        .spin {
+        .history-list li {
+            padding: 6px;
+            border-bottom: 1px solid #ffd96644;
+        }
+        .close-history {
+            margin-top: 15px;
             background: #ffcf6e;
             border: none;
-            width: 160px;
-            padding: 10px 0;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #2d1e09;
+            padding: 8px;
+            width: 100%;
+            border-radius: 30px;
             cursor: pointer;
-            margin-top: 4px;
         }
-        .spin:active { transform: translateY(2px); }
-        .reel, .info, .bet, .spin, .panel-top, .panel-mid, .panel-bottom { border-radius: 0px; }
     </style>
 </head>
 <body>
@@ -144,22 +226,39 @@
         <div class="win-line"></div>
     </div>
     <div class="panel-bottom">
-        <div class="info">
+        <!-- 信息行：余额 得分 总押分 -->
+        <div class="info-row">
             <div>💰 余额 <span id="balance">1000</span></div>
             <div>🏆 得分 <span id="score">0</span></div>
-            <div>🎲 押分 <span id="betAmount">20</span></div>
+            <div>🎲 总押分 <span id="totalBet">20</span></div>
         </div>
-        <div class="bet">
-            <button id="minus">−</button>
-            <span id="betValue">20</span>
-            <button id="plus">+</button>
+        <!-- 底部控制区：透明按钮覆盖背景图上的设计 -->
+        <div class="controls">
+            <div class="left-group">
+                <button class="ctrl-btn" id="speedBtn">⚡ 加速</button>
+                <button class="ctrl-btn" id="autoBtn">🔄 自动</button>
+            </div>
+            <button class="adj-btn ctrl-btn" id="minusBet">-</button>
+            <button class="spin-big" id="spinBtn">🎰 旋转</button>
+            <button class="adj-btn ctrl-btn" id="plusBet">+</button>
+            <div class="right-group">
+                <button class="ctrl-btn" id="historyBtn">📜 历史</button>
+            </div>
         </div>
-        <button class="spin" id="spinBtn">🎰 旋转 🎰</button>
+    </div>
+</div>
+
+<!-- 历史弹窗 -->
+<div id="historyModal" class="history-modal">
+    <div class="history-content">
+        <h3 style="margin-bottom:12px">📜 开奖记录</h3>
+        <ul class="history-list" id="historyList"></ul>
+        <button class="close-history" id="closeHistory">关闭</button>
     </div>
 </div>
 
 <script>
-    // ----- 老虎数据 -----
+    // ---------- 老虎配置 ----------
     const TIGERS = {
         green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
         red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
@@ -169,17 +268,34 @@
     function rand() { return LIST[Math.floor(Math.random()*3)]; }
     function makeStrip() { return [rand(), rand(), rand()]; }
 
-    // 每个转轴的数据：3个老虎（上中下） 和 当前显示的偏移索引（0上,1中,2下）
+    // 转轴数据
     let strips = [makeStrip(), makeStrip(), makeStrip()];
-    let offsets = [1, 1, 1];
+    let offsets = [1, 1, 1];   // 当前显示中间索引
     let balance = 1000, score = 0, bet = 20;
     let spinning = false;
+    let autoSpinFlag = false;
+    let spinSpeed = 70;        // 基础滚动步间隔(ms)，加速后减小
 
+    // DOM 元素
     const stripDivs = [
         document.getElementById('strip0'),
         document.getElementById('strip1'),
         document.getElementById('strip2')
     ];
+    const balanceSpan = document.getElementById('balance');
+    const scoreSpan = document.getElementById('score');
+    const totalBetSpan = document.getElementById('totalBet');
+    const spinBtn = document.getElementById('spinBtn');
+    const minusBet = document.getElementById('minusBet');
+    const plusBet = document.getElementById('plusBet');
+    const speedBtn = document.getElementById('speedBtn');
+    const autoBtn = document.getElementById('autoBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const historyModal = document.getElementById('historyModal');
+    const historyList = document.getElementById('historyList');
+    const closeHistory = document.getElementById('closeHistory');
+
+    let historyRecords = [];
 
     // 渲染单个转轴
     function renderReel(idx) {
@@ -195,52 +311,61 @@
             item.appendChild(img);
             container.appendChild(item);
         }
-        // 根据偏移量平移：每个item高120px
         container.style.transform = `translateY(${-offsets[idx] * 120}px)`;
     }
 
     function updateUI() {
-        document.getElementById('balance').innerText = balance;
-        document.getElementById('score').innerText = score;
-        document.getElementById('betAmount').innerText = bet;
-        document.getElementById('betValue').innerText = bet;
+        balanceSpan.innerText = balance;
+        scoreSpan.innerText = score;
+        totalBetSpan.innerText = bet;
     }
 
-    // 单向向下滚动动画（永不回头）
-    // 原理：不停增加偏移量，模3递增，并且每次增加时重新渲染，形成连续向下的感觉
-    // 停止时直接跳转到最终偏移，不会回退
+    // 单向向下滚动动画 (勇往直前，绝不回头)
     function animateReel(idx, durationMs, finalOffset, finalStrip) {
         return new Promise((resolve) => {
-            const startTime = performance.now();
-            const totalSteps = 24;          // 总滚动步数
+            const totalSteps = 20;
             let step = 0;
             let currentOffset = offsets[idx];
-
+            // 每步间隔 (duration/totalSteps)
+            const stepDelay = durationMs / totalSteps;
             function stepAnimation() {
                 if (step >= totalSteps) {
-                    // 结束：直接硬设最终结果（无回退）
+                    // 最终结果硬设
                     strips[idx] = finalStrip;
                     offsets[idx] = finalOffset;
                     renderReel(idx);
                     resolve();
                     return;
                 }
-                // 向下滚动：偏移量 +1 (模3)
+                // 向下滚动：偏移量+1 (模3)
                 currentOffset = (currentOffset + 1) % 3;
                 offsets[idx] = currentOffset;
                 renderReel(idx);
                 step++;
-                // 根据时间总长分配每一帧的延迟，使其在durationMs内完成
-                const delay = durationMs / totalSteps;
-                setTimeout(stepAnimation, delay);
+                setTimeout(stepAnimation, stepDelay);
             }
             stepAnimation();
         });
     }
 
+    // 添加历史记录
+    function addHistory(text) {
+        historyRecords.unshift(text);
+        if (historyRecords.length > 20) historyRecords.pop();
+        historyList.innerHTML = '';
+        historyRecords.forEach(rec => {
+            const li = document.createElement('li');
+            li.textContent = rec;
+            historyList.appendChild(li);
+        });
+    }
+
+    // 旋转主逻辑
     async function spin() {
         if (spinning) return;
         if (balance < bet) {
+            // 余额不足且自动旋转时停止自动
+            if (autoSpinFlag) stopAutoSpin();
             alert('余额不足');
             return;
         }
@@ -250,18 +375,17 @@
 
         // 预先生成最终结果
         const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
-        const finalOffsets = [1, 1, 1];  // 最终都停在中间位置
-        // 每个转轴滚动时长：左 600ms，中 900ms，右 1200ms（实现依次停止）
+        const finalOffsets = [1, 1, 1];
+        // 左、中、右停止延迟 (ms)  依次停止
         const durations = [600, 900, 1200];
 
-        // 并行执行三个动画，但使用 Promise.all 等待全部完成
         const promises = [];
         for (let i = 0; i < 3; i++) {
             promises.push(animateReel(i, durations[i], finalOffsets[i], finalStrips[i]));
         }
         await Promise.all(promises);
 
-        // 结算中奖
+        // 结算
         const t0 = strips[0][1];
         const t1 = strips[1][1];
         const t2 = strips[2][1];
@@ -270,16 +394,125 @@
         if (win > 0) {
             balance += win;
             score += win;
-            // 无弹窗（用户要求删除）
+            addHistory(`🎉 中奖 +${win} (${mult}倍) ${t0.name} ${t1.name} ${t2.name}`);
+        } else {
+            addHistory(`😞 未中奖 ${t0.name} ${t1.name} ${t2.name}`);
         }
         updateUI();
         spinning = false;
+
+        // 自动旋转继续
+        if (autoSpinFlag && balance >= bet) {
+            setTimeout(() => spin(), 200);
+        } else if (autoSpinFlag && balance < bet) {
+            stopAutoSpin();
+        }
     }
 
-    // 绑定事件
-    document.getElementById('minus').onclick = () => { if (bet > 10) { bet -= 10; updateUI(); } };
-    document.getElementById('plus').onclick  = () => { if (bet < 500) { bet += 10; updateUI(); } };
-    document.getElementById('spinBtn').onclick = spin;
+    function stopAutoSpin() {
+        autoSpinFlag = false;
+        autoBtn.innerText = '🔄 自动';
+    }
+
+    // 加速功能 (改变动画步间隔，实际调整滚动速度)
+    let speedFactor = 1;
+    // 注意：我们动画内使用的是固定的stepDelay，不是全局变量。简化加速：重新定义animateReel中stepDelay使用全局因子。
+    // 修改animateReel使用全局速度因子
+    // 重新实现加速：通过改变durationMs的系数。加速后持续时间减半，自然滚动变快。
+    let speedMultiplier = 1; // 1正常，0.5加速一倍
+    // 替换原来的animateReel实现，使其支持动态速度
+    window.animateReel = function(idx, baseDuration, finalOffset, finalStrip) {
+        const duration = baseDuration * speedMultiplier;
+        return new Promise((resolve) => {
+            const totalSteps = 18;
+            let step = 0;
+            let currentOffset = offsets[idx];
+            const stepDelay = duration / totalSteps;
+            function stepAnim() {
+                if (step >= totalSteps) {
+                    strips[idx] = finalStrip;
+                    offsets[idx] = finalOffset;
+                    renderReel(idx);
+                    resolve();
+                    return;
+                }
+                currentOffset = (currentOffset + 1) % 3;
+                offsets[idx] = currentOffset;
+                renderReel(idx);
+                step++;
+                setTimeout(stepAnim, stepDelay);
+            }
+            stepAnim();
+        });
+    };
+
+    // 重写spin调用新的animateReel
+    const originalSpin = spin;
+    window.spin = async function() {
+        if (spinning) return;
+        if (balance < bet) {
+            if (autoSpinFlag) stopAutoSpin();
+            alert('余额不足');
+            return;
+        }
+        spinning = true;
+        balance -= bet;
+        updateUI();
+
+        const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
+        const finalOffsets = [1, 1, 1];
+        const baseDurations = [600, 900, 1200];
+        const promises = [];
+        for (let i = 0; i < 3; i++) {
+            promises.push(window.animateReel(i, baseDurations[i], finalOffsets[i], finalStrips[i]));
+        }
+        await Promise.all(promises);
+
+        const t0 = strips[0][1];
+        const t1 = strips[1][1];
+        const t2 = strips[2][1];
+        let mult = (t0.color === t1.color && t1.color === t2.color) ? t0.mult : 8;
+        let win = bet * mult;
+        if (win > 0) {
+            balance += win;
+            score += win;
+            addHistory(`🎉 中奖 +${win} (${mult}倍) ${t0.name} ${t1.name} ${t2.name}`);
+        } else {
+            addHistory(`😞 未中奖 ${t0.name} ${t1.name} ${t2.name}`);
+        }
+        updateUI();
+        spinning = false;
+        if (autoSpinFlag && balance >= bet) {
+            setTimeout(() => window.spin(), 200);
+        } else if (autoSpinFlag && balance < bet) {
+            stopAutoSpin();
+        }
+    };
+
+    // 绑定按钮事件
+    minusBet.onclick = () => { if (bet > 10) { bet -= 10; updateUI(); } };
+    plusBet.onclick  = () => { if (bet < 500) { bet += 10; updateUI(); } };
+    spinBtn.onclick = () => { if (!spinning) window.spin(); };
+    speedBtn.onclick = () => {
+        if (speedMultiplier === 1) {
+            speedMultiplier = 0.5;
+            speedBtn.innerText = '🐢 正常';
+        } else {
+            speedMultiplier = 1;
+            speedBtn.innerText = '⚡ 加速';
+        }
+    };
+    autoBtn.onclick = () => {
+        if (autoSpinFlag) {
+            stopAutoSpin();
+        } else {
+            autoSpinFlag = true;
+            autoBtn.innerText = '⏸ 停止';
+            if (!spinning) window.spin();
+        }
+    };
+    historyBtn.onclick = () => historyModal.classList.add('show');
+    closeHistory.onclick = () => historyModal.classList.remove('show');
 
     // 初始化渲染
     for (let i = 0; i < 3; i++) renderReel(i);
