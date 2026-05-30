@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: #0a0a12;
@@ -18,16 +17,24 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: system-ui, 'Segoe UI', sans-serif;
         }
+        /* 主容器：固定宽500px，无圆角，内陷效果（内阴影+边框） */
         .app {
             width: 500px;
             background: #0f0f1a;
+            box-shadow: inset 0 0 0 2px #2a2a3a, 0 10px 20px rgba(0,0,0,0.5);
+            /* 无圆角 */
         }
+        /* 上板块：固定500x375，背景图，内陷边线 */
         .panel-top {
             width: 500px;
             height: 375px;
             background: url('slot-top.jpg') center/cover no-repeat;
+            border-bottom: 1px solid #2a2a3a;
+            box-shadow: inset 0 0 0 1px #3a3a4a;
         }
+        /* 中板块：固定500x281，背景图，内陷 */
         .panel-mid {
             width: 500px;
             height: 281px;
@@ -37,14 +44,28 @@
             align-items: center;
             gap: 16px;
             position: relative;
+            border-bottom: 1px solid #2a2a3a;
+            box-shadow: inset 0 0 0 1px #3a3a4a;
         }
+        /* 下板块：固定500x282，背景图，内陷 */
+        .panel-bottom {
+            width: 500px;
+            height: 282px;
+            background: url('slot-bottom.jpg') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            box-shadow: inset 0 0 0 1px #3a3a4a;
+        }
+        /* 滚轮样式（无圆角） */
         .reel {
             width: 90px;
             height: 120px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
+            background: rgba(0,0,0,0.6);
             overflow: hidden;
-            box-shadow: inset 0 0 0 2px #ffd96688;
+            box-shadow: inset 0 0 0 2px #ffd96688, 0 2px 6px black;
         }
         .reel-strip {
             display: flex;
@@ -63,6 +84,7 @@
             height: 75px;
             object-fit: contain;
         }
+        /* 中奖线 */
         .win-line {
             position: absolute;
             top: 50%;
@@ -72,25 +94,18 @@
             background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
             pointer-events: none;
             transform: translateY(-50%);
+            box-shadow: 0 0 4px #ffaa66;
         }
-        .panel-bottom {
-            width: 500px;
-            height: 282px;
-            background: url('slot-bottom.jpg') center/cover no-repeat;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
+        /* 信息区无圆角 */
         .info {
             display: flex;
             gap: 20px;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.65);
             padding: 8px 20px;
-            border-radius: 60px;
             color: #ffd966;
             font-size: 0.8rem;
+            border: 1px solid #3a3a4a;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
         }
         .info span {
             font-weight: bold;
@@ -99,20 +114,23 @@
         .bet {
             display: flex;
             gap: 15px;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.65);
             padding: 5px 16px;
-            border-radius: 60px;
+            border: 1px solid #3a3a4a;
         }
         .bet button {
             background: #2a2a3a;
             border: none;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
             font-size: 1.4rem;
             font-weight: bold;
             color: #ffd966;
             cursor: pointer;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 1px 2px black;
+        }
+        .bet button:active {
+            transform: translateY(1px);
         }
         .spin {
             background: radial-gradient(circle at 30% 20%, #ffcf6e, #be691f);
@@ -121,12 +139,19 @@
             padding: 10px 0;
             font-size: 1.2rem;
             font-weight: bold;
-            border-radius: 60px;
             color: #2d1e09;
-            box-shadow: 0 4px 0 #784818;
             cursor: pointer;
+            box-shadow: 0 4px 0 #784818, inset 0 1px 1px rgba(255,255,255,0.3);
+            transition: 0.05s linear;
         }
-        .spin:active { transform: translateY(2px); box-shadow: 0 1px 0 #784818; }
+        .spin:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #784818;
+        }
+        /* 完全无圆角 */
+        .reel, .info, .bet, .spin, .panel-top, .panel-mid, .panel-bottom {
+            border-radius: 0px;
+        }
     </style>
 </head>
 <body>
@@ -139,9 +164,17 @@
         <div class="win-line"></div>
     </div>
     <div class="panel-bottom">
-        <div class="info"><div>💰 余额 <span id="balance">1000</span></div><div>🏆 得分 <span id="score">0</span></div><div>🎲 押分 <span id="betAmount">20</span></div></div>
-        <div class="bet"><button id="minus">−</button><span style="width:60px;text-align:center;color:#ffd966;">20</span><button id="plus">+</button></div>
-        <button class="spin" id="spin">🎰 旋转 🎰</button>
+        <div class="info">
+            <div>💰 余额 <span id="balance">1000</span></div>
+            <div>🏆 得分 <span id="score">0</span></div>
+            <div>🎲 押分 <span id="betAmount">20</span></div>
+        </div>
+        <div class="bet">
+            <button id="minus">−</button>
+            <span style="width:60px;text-align:center;color:#ffd966;">20</span>
+            <button id="plus">+</button>
+        </div>
+        <button class="spin" id="spinBtn">🎰 旋转 🎰</button>
     </div>
 </div>
 
@@ -153,29 +186,31 @@
     };
     const LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
     function rand() { return LIST[Math.floor(Math.random()*3)]; }
-    function strip() { return [rand(), rand(), rand()]; }
+    function makeStrip() { return [rand(), rand(), rand()]; }
 
-    let data = [strip(), strip(), strip()];
-    let pos = [1,1,1]; // 当前显示中间索引
+    let strips = [makeStrip(), makeStrip(), makeStrip()];
+    let offsets = [1,1,1];
     let balance = 1000, score = 0, bet = 20;
     let spinning = false;
 
-    const stripsDOM = [document.getElementById('strip0'), document.getElementById('strip1'), document.getElementById('strip2')];
-    function render(i) {
-        const s = data[i];
-        const dom = stripsDOM[i];
-        dom.innerHTML = '';
+    const stripDivs = [document.getElementById('strip0'), document.getElementById('strip1'), document.getElementById('strip2')];
+
+    function renderReel(i) {
+        const s = strips[i];
+        const div = stripDivs[i];
+        div.innerHTML = '';
         for(let j=0;j<3;j++) {
-            const d = document.createElement('div');
-            d.className = 'reel-item';
+            const item = document.createElement('div');
+            item.className = 'reel-item';
             const img = document.createElement('img');
             img.className = 'reel-img';
             img.src = s[j].img;
-            d.appendChild(img);
-            dom.appendChild(d);
+            item.appendChild(img);
+            div.appendChild(item);
         }
-        dom.style.transform = `translateY(${-pos[i]*120}px)`;
+        div.style.transform = `translateY(${-offsets[i]*120}px)`;
     }
+
     function updateUI() {
         document.getElementById('balance').innerText = balance;
         document.getElementById('score').innerText = score;
@@ -183,69 +218,69 @@
         document.querySelector('.bet span').innerText = bet;
     }
 
-    function spin() {
+    async function spin() {
         if(spinning) return;
         if(balance < bet) { alert('余额不足'); return; }
         spinning = true;
         balance -= bet;
         updateUI();
-        // 左中右依次停止的时间(ms)
-        const times = [600, 1000, 1400];
-        const finalStrips = [strip(), strip(), strip()];
-        const finalPos = [1,1,1];
-        let stopCount = 0;
 
-        function startReel(idx) {
-            let frame = 0;
-            const maxFrame = 12;
-            function step() {
-                if(frame < maxFrame) {
-                    // 随机改变位置（模拟滚动）
-                    pos[idx] = (pos[idx] + 1) % 3;
-                    render(idx);
-                    frame++;
-                    requestAnimationFrame(step);
-                } else {
-                    // 停止：固定最终结果
-                    data[idx] = finalStrips[idx];
-                    pos[idx] = finalPos[idx];
-                    render(idx);
-                    stopCount++;
-                    if(stopCount === 3) {
-                        const t0 = data[0][1], t1 = data[1][1], t2 = data[2][1];
-                        let mult = (t0.color===t1.color && t1.color===t2.color) ? t0.mult : 8;
-                        let win = bet * mult;
-                        if(win>0) {
-                            balance += win;
-                            score += win;
-                            alert(`中奖 ${win} 分`);
-                        } else {
-                            alert(`未中奖`);
+        const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
+        const finalOffsets = [1,1,1];
+        // 左中右停止延迟(ms)
+        const delays = [0, 500, 1000];
+        let done = 0;
+
+        function startReel(idx, delay) {
+            setTimeout(() => {
+                let frames = 0;
+                const maxFrames = 12;
+                function step() {
+                    if(frames < maxFrames) {
+                        // 随机向前滚动
+                        offsets[idx] = (offsets[idx] + 1) % 3;
+                        renderReel(idx);
+                        frames++;
+                        requestAnimationFrame(step);
+                    } else {
+                        // 停止并设为最终结果
+                        strips[idx] = finalStrips[idx];
+                        offsets[idx] = finalOffsets[idx];
+                        renderReel(idx);
+                        done++;
+                        if(done === 3) {
+                            const t0 = strips[0][1];
+                            const t1 = strips[1][1];
+                            const t2 = strips[2][1];
+                            let mult = (t0.color===t1.color && t1.color===t2.color) ? t0.mult : 8;
+                            let win = bet * mult;
+                            if(win>0) {
+                                balance += win;
+                                score += win;
+                                alert(`🎉 中奖 ${win} 分 (${mult}倍)`);
+                            } else {
+                                alert(`😞 未中奖`);
+                            }
+                            updateUI();
+                            spinning = false;
                         }
-                        updateUI();
-                        spinning = false;
                     }
                 }
-            }
-            setTimeout(step, 50);
+                step();
+            }, delay);
         }
 
-        startReel(0);
-        setTimeout(() => startReel(1), times[0]);
-        setTimeout(() => startReel(2), times[1]);
+        startReel(0, delays[0]);
+        startReel(1, delays[1]);
+        startReel(2, delays[2]);
     }
 
     document.getElementById('minus').onclick = () => { if(bet>10) { bet-=10; updateUI(); } };
     document.getElementById('plus').onclick = () => { if(bet<500) { bet+=10; updateUI(); } };
-    document.getElementById('spin').onclick = spin;
+    document.getElementById('spinBtn').onclick = spin;
 
-    for(let i=0;i<3;i++) render(i);
+    for(let i=0;i<3;i++) renderReel(i);
     updateUI();
 </script>
 </body>
 </html>
-
-
-
-
-
