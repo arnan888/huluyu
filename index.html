@@ -10,36 +10,78 @@
             box-sizing: border-box;
         }
         body {
-            width: 650
             background: #0a0a12;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: system-ui, 'Segoe UI', sans-serif;
         }
         .app {
-            width: 620px;
+            width: 100%;
+            max-width: 500px;
+            background: #0f0f1a;
+            position: relative;
         }
+        /* 上区块：展示赔率信息（系统赔付） */
         .panel-top {
-            width: 600px;
-            height: 450px;
+            width: 100%;
+            aspect-ratio: 500 / 375;
             background: url('slot-top.jpg') center/cover no-repeat;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
         }
+        /* 赔付表样式 */
+        .paytable {
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #ffd966;
+            border: 1px solid #ffd96666;
+        }
+        .paytable span {
+            white-space: nowrap;
+        }
+        .paytable span:nth-child(1) { color: #6eff6e; }  /* 绿虎 28X */
+        .paytable span:nth-child(2) { color: #ff8a6e; }  /* 红虎 58X */
+        .paytable span:nth-child(3) { color: #ffcf4a; }  /* 金虎 88X */
+        .paytable span:nth-child(4) { color: #aaaaff; }  /* 任意三虎 8X */
+
+        /* 中区块：老虎机显示区域（暂为空容器） */
         .panel-mid {
-            width: 600px;
-            height: 337px;
+            width: 100%;
+            aspect-ratio: 500 / 281;
             background: url('slot-mid.png') center/cover no-repeat;
         }
+        /* 下区块：控制区（功能按钮暂不写） */
         .panel-bottom {
-            width: 600px;
-            height: 338px;
+            width: 100%;
+            aspect-ratio: 500 / 282;
             background: url('slot-bottom.jpg') center/cover no-repeat;
         }
     </style>
 </head>
 <body>
 <div class="app">
-    <div class="panel-top"></div>
+    <div class="panel-top">
+        <div class="paytable">
+            <span>🟢 绿虎 28X</span>
+            <span>🔴 红虎 58X</span>
+            <span>🟡 金虎 88X</span>
+            <span>🎲 任意三虎 8X</span>
+        </div>
+    </div>
     <div class="panel-mid"></div>
     <div class="panel-bottom"></div>
 </div>
