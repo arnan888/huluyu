@@ -27,21 +27,13 @@
         }
 
         .app {
-            width: 100vh;
+            width: 500px;
             height: 800px;
             display: flex;
             flex-direction: column;
-            background: transparent;
+            background:;
         }
 
-        /* 顶部UI区 250px */
-        .top-area {
-            height: 250px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            background: transparent;
-        }
 
         .game-title {
             text-align: center;
@@ -96,8 +88,8 @@
             display: flex;
         }
         .slot-bottom {
-            width: 600px;
-            height: 338px;
+            width: 500px;
+            height: 300px;
             background-image: url('slot-bottom.png');
             background-size: cover;
             background-position: center;
@@ -126,18 +118,18 @@
 
         /* 上槽位：只显示上半部分 */
         .slot-top .tiger-wrapper {
-            height: 120px;
+            height: 75px;
             overflow: hidden;
             align-items: flex-start;
         }
         /* 中槽位：完整显示 */
         .slot-mid .tiger-wrapper {
-            height: 120px;
+            height: 150px;
             overflow: visible;
         }
         /* 下槽位：只显示下半部分 */
         .slot-bottom .tiger-wrapper {
-            height: 120px;
+            height: 75px;
             overflow: hidden;
             align-items: flex-end;
         }
@@ -149,8 +141,8 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
-            box-shadow: 0 0 12px #ffaa66;
+           
+            box-shadow: 0 0 1px #ffaa66;
             transform: translateY(-50%);
             z-index: 5;
             pointer-events: none;
@@ -158,8 +150,8 @@
 
         /* 底部操控区 250px */
         .bottom-area {
-            height: 250px;
-            padding: 20px;
+            height: 500px;
+            padding: 200px;
             display: flex;
             flex-direction: column;
             background: transparent;
@@ -291,7 +283,7 @@
 <div class="app">
     <div class="top-area">
         <div class="game-title">
-            <h1>🐅 三槽帝王 🐅</h1>
+            <h1></h1>
         </div>
         <div class="jackpot-area">
             <div class="jackpot-label">💎 大奖池 💎</div>
