@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 固定尺寸居中</title>
+    <title>老虎机 | 固定宽度 满屏高度</title>
     <style>
         * {
             margin: 0;
@@ -19,25 +19,26 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* 主容器固定宽500px，不随父容器放大，始终居中 */
+        /* 主容器：固定宽500，高度占满视口，flex列布局 */
         .app {
             width: 500px;
+            height: 100vh;          /* 占满整个视口高度 */
             background: #0f0f1a;
+            display: flex;
+            flex-direction: column;
             box-shadow: inset 0 0 0 2px #2a2a3a, 0 10px 20px rgba(0,0,0,0.5);
             /* 无圆角 */
         }
-        /* 上板块：固定500x375 */
+        /* 上板块：占37.5% */
         .panel-top {
-            width: 500px;
-            height: 375px;
+            flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
             border-bottom: 1px solid #2a2a3a;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 中板块：固定500x281 */
+        /* 中板块：占28.1% */
         .panel-mid {
-            width: 500px;
-            height: 281px;
+            flex: 28.1;
             background: url('slot-mid.png') center/cover no-repeat;
             display: flex;
             justify-content: center;
@@ -47,10 +48,9 @@
             border-bottom: 1px solid #2a2a3a;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 下板块：固定500x282 */
+        /* 下板块：占34.4% */
         .panel-bottom {
-            width: 500px;
-            height: 282px;
+            flex: 34.4;
             background: url('slot-bottom.jpg') center/cover no-repeat;
             display: flex;
             flex-direction: column;
@@ -59,6 +59,7 @@
             gap: 12px;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
+        /* 滚轮样式 */
         .reel {
             width: 90px;
             height: 120px;
