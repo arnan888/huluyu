@@ -4,13 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0a0a12; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .app { width: 500px; }
-        .panel-top { width: 500px; height: 375px; background: url('slot-top.jpg') center/cover; }
-        .panel-mid { width: 500px; height: 281px; background: url('slot-mid.png') center/cover; }
-        .panel-bottom { width: 500px; height: 282px; background: url('slot-bottom.jpg') center/cover; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 650
+            background: #0a0a12;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app {
+            width: 620px;
+        }
+        .panel-top {
+            width: 600px;
+            height: 450px;
+            background: url('slot-top.jpg') center/cover no-repeat;
+        }
+        .panel-mid {
+            width: 600px;
+            height: 337px;
+            background: url('slot-mid.png') center/cover no-repeat;
+        }
+        .panel-bottom {
+            width: 600px;
+            height: 338px;
+            background: url('slot-bottom.jpg') center/cover no-repeat;
+        }
     </style>
 </head>
+<body>
+<div class="app">
+    <div class="panel-top"></div>
+    <div class="panel-mid"></div>
+    <div class="panel-bottom"></div>
+</div>
 </body>
 </html>
