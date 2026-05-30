@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 固定宽度 满屏高度</title>
+    <title>老虎机 | 无弹窗</title>
     <style>
         * {
             margin: 0;
@@ -19,26 +19,22 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* 主容器：固定宽500，高度占满视口，flex列布局 */
         .app {
             width: 500px;
-            height: 100vh;          /* 占满整个视口高度 */
+            height: 100vh;
             background: #0f0f1a;
             display: flex;
             flex-direction: column;
             box-shadow: inset 0 0 0 2px #2a2a3a, 0 10px 20px rgba(0,0,0,0.5);
-            /* 无圆角 */
         }
-        /* 上板块：占37.5% */
         .panel-top {
-            flex: 37.5;
+            flex: 36.5;
             background: url('slot-top.jpg') center/cover no-repeat;
             border-bottom: 1px solid #2a2a3a;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 中板块：占28.1% */
         .panel-mid {
-            flex: 28.1;
+            flex: 27.1;
             background: url('slot-mid.png') center/cover no-repeat;
             display: flex;
             justify-content: center;
@@ -48,9 +44,8 @@
             border-bottom: 1px solid #2a2a3a;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 下板块：占34.4% */
         .panel-bottom {
-            flex: 34.4;
+            flex: 33.4;
             background: url('slot-bottom.jpg') center/cover no-repeat;
             display: flex;
             flex-direction: column;
@@ -59,9 +54,8 @@
             gap: 12px;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 滚轮样式 */
         .reel {
-            width: 90px;
+            width: 150px;
             height: 120px;
             background: rgba(0,0,0,0.6);
             overflow: hidden;
@@ -73,15 +67,15 @@
             transition: transform 0.05s linear;
         }
         .reel-item {
-            width: 90px;
+            width: 150px;
             height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .reel-img {
-            width: 75px;
-            height: 75px;
+            width: 148px;
+            height: 148px;
             object-fit: contain;
         }
         .win-line {
@@ -139,7 +133,6 @@
             transition: 0.05s linear;
         }
         .spin:active { transform: translateY(2px); box-shadow: 0 1px 0 #784818; }
-        /* 无圆角 */
         .reel, .info, .bet, .spin, .panel-top, .panel-mid, .panel-bottom {
             border-radius: 0px;
         }
@@ -211,7 +204,11 @@
 
     async function spin() {
         if(spinning) return;
-        if(balance < bet) { alert('余额不足'); return; }
+        if(balance < bet) {
+            // 余额不足提示使用 alert 但用户未明确要求删除余额不足提示，但为了保持一致也可以删除？用户只说删除中奖弹窗，余额不足保留吧。但为符合无打扰，也可以静默。按用户要求只删除中奖弹窗。
+            alert('余额不足');
+            return;
+        }
         spinning = true;
         balance -= bet;
         updateUI();
@@ -245,9 +242,7 @@
                             if(win>0) {
                                 balance += win;
                                 score += win;
-                                alert(`🎉 中奖 ${win} 分 (${mult}倍)`);
-                            } else {
-                                alert(`😞 未中奖`);
+                                // 中奖弹窗已删除
                             }
                             updateUI();
                             spinning = false;
