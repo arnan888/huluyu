@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>老虎机 | 固定尺寸居中</title>
     <style>
         * {
             margin: 0;
@@ -17,27 +18,26 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: system-ui, 'Segoe UI', sans-serif;
         }
-        /* 主容器：固定宽500px，无圆角，内陷效果（内阴影+边框） */
+        /* 主容器固定宽500px，不随父容器放大，始终居中 */
         .app {
-            width: 550px;
+            width: 500px;
             background: #0f0f1a;
             box-shadow: inset 0 0 0 2px #2a2a3a, 0 10px 20px rgba(0,0,0,0.5);
             /* 无圆角 */
         }
-        /* 上板块：固定500x375，背景图，内陷边线 */
+        /* 上板块：固定500x375 */
         .panel-top {
-            width: 490px;
-            height: 365px;
+            width: 500px;
+            height: 375px;
             background: url('slot-top.jpg') center/cover no-repeat;
             border-bottom: 1px solid #2a2a3a;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 中板块：固定500x281，背景图，内陷 */
+        /* 中板块：固定500x281 */
         .panel-mid {
-            width: 490px;
-            height: 271px;
+            width: 500px;
+            height: 281px;
             background: url('slot-mid.png') center/cover no-repeat;
             display: flex;
             justify-content: center;
@@ -47,10 +47,10 @@
             border-bottom: 1px solid #2a2a3a;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 下板块：固定490x272，背景图，内陷 */
+        /* 下板块：固定500x282 */
         .panel-bottom {
-            width: 4900px;
-            height: 272px;
+            width: 500px;
+            height: 282px;
             background: url('slot-bottom.jpg') center/cover no-repeat;
             display: flex;
             flex-direction: column;
@@ -59,9 +59,8 @@
             gap: 12px;
             box-shadow: inset 0 0 0 1px #3a3a4a;
         }
-        /* 滚轮样式（无圆角） */
         .reel {
-            width: 150px;
+            width: 90px;
             height: 120px;
             background: rgba(0,0,0,0.6);
             overflow: hidden;
@@ -73,18 +72,17 @@
             transition: transform 0.05s linear;
         }
         .reel-item {
-            width: 150px;
+            width: 90px;
             height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .reel-img {
-            width: 120px;
-            height: 120px;
+            width: 75px;
+            height: 75px;
             object-fit: contain;
         }
-        /* 中奖线 */
         .win-line {
             position: absolute;
             top: 50%;
@@ -96,7 +94,6 @@
             transform: translateY(-50%);
             box-shadow: 0 0 4px #ffaa66;
         }
-        /* 信息区无圆角 */
         .info {
             display: flex;
             gap: 20px;
@@ -105,7 +102,6 @@
             color: #ffd966;
             font-size: 0.8rem;
             border: 1px solid #3a3a4a;
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
         }
         .info span {
             font-weight: bold;
@@ -127,11 +123,8 @@
             font-weight: bold;
             color: #ffd966;
             cursor: pointer;
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 1px 2px black;
         }
-        .bet button:active {
-            transform: translateY(1px);
-        }
+        .bet button:active { transform: translateY(1px); }
         .spin {
             background: radial-gradient(circle at 30% 20%, #ffcf6e, #be691f);
             border: none;
@@ -141,14 +134,11 @@
             font-weight: bold;
             color: #2d1e09;
             cursor: pointer;
-            box-shadow: 0 4px 0 #784818, inset 0 1px 1px rgba(255,255,255,0.3);
+            box-shadow: 0 4px 0 #784818;
             transition: 0.05s linear;
         }
-        .spin:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #784818;
-        }
-        /* 完全无圆角 */
+        .spin:active { transform: translateY(2px); box-shadow: 0 1px 0 #784818; }
+        /* 无圆角 */
         .reel, .info, .bet, .spin, .panel-top, .panel-mid, .panel-bottom {
             border-radius: 0px;
         }
@@ -227,7 +217,6 @@
 
         const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
         const finalOffsets = [1,1,1];
-        // 左中右停止延迟(ms)
         const delays = [0, 500, 1000];
         let done = 0;
 
@@ -237,13 +226,11 @@
                 const maxFrames = 12;
                 function step() {
                     if(frames < maxFrames) {
-                        // 随机向前滚动
                         offsets[idx] = (offsets[idx] + 1) % 3;
                         renderReel(idx);
                         frames++;
                         requestAnimationFrame(step);
                     } else {
-                        // 停止并设为最终结果
                         strips[idx] = finalStrips[idx];
                         offsets[idx] = finalOffsets[idx];
                         renderReel(idx);
