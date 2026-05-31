@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 背景按钮热区</title>
     <style>
         * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: #0a0a12;
@@ -19,18 +18,19 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* 主容器固定宽500，高度100vh，三块比例固定 */
         .app {
-            width: 500px;
-            height: 100vh;
+            width: 100%;
+            max-width: 500px;
+            background: #0f0f1a;
             display: flex;
             flex-direction: column;
-            background: #0f0f1a;
+            min-height: 100dvh;
         }
         .panel-top {
             flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
         }
+        /* 中区块：每个槽位独立上下滚动 */
         .panel-mid {
             flex: 28.1;
             background: url('slot-mid.png') center/cover no-repeat;
@@ -40,21 +40,21 @@
             gap: 16px;
             position: relative;
         }
-        .panel-bottom {
-            flex: 34.4;
-            background: url('slot-bottom.jpg') center/cover no-repeat;
-            position: relative;
-        }
-        /* 滚轮样式 */
+        /* 单个滚动槽位容器 */
         .reel {
             width: 90px;
             height: 120px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
             overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 0 2px #ffd96688;
         }
+        /* 滚动条内部垂直排列三个老虎 */
         .reel-strip {
             display: flex;
             flex-direction: column;
+            transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             will-change: transform;
         }
         .reel-item {
@@ -69,6 +69,7 @@
             height: 75px;
             object-fit: contain;
         }
+        /* 固定中奖线（在老虎后面） */
         .win-line {
             position: absolute;
             top: 50%;
@@ -76,94 +77,71 @@
             width: 100%;
             height: 3px;
             background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
-            pointer-events: none;
             transform: translateY(-50%);
+            z-index: 1;
+            pointer-events: none;
         }
-        /* 信息栏 - 显示余额/得分/押分，使用绝对定位，坐标按背景图设计（可微调） */
-        .info-bar {
-            position: absolute;
-            top: 18%;
-            left: 0;
-            width: 100%;
+        .panel-bottom {
+            flex: 34.4;
+            background: url('slot-bottom.jpg') center/cover no-repeat;
             display: flex;
-            justify-content: space-around;
-            padding: 0 20px;
-            color: #ffd966;
-            font-size: 0.9rem;
-            font-weight: bold;
-            text-shadow: 0 0 2px black;
-            pointer-events: none; /* 让文字不干扰点击 */
-        }
-        .info-bar span {
-            font-size: 1.1rem;
-            margin-left: 5px;
-        }
-        /* 按钮热区容器 - 绝对定位，完全覆盖底部背景图上的按钮区域 */
-        .button-hotspots {
-            position: absolute;
-            bottom: 12%;
-            left: 0;
-            width: 100%;
-            height: 60px;  /* 按钮区域高度，可调 */
-            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 0;
-            /* 背景透明，不干扰背景图显示 */
+            gap: 12px;
+            padding: 20px;
         }
-        /* 所有热区按钮：透明、无边框、无文字、可点击，仅占位 */
-        .hotspot {
-            background: transparent;
+        .info-row {
+            display: flex;
+            gap: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            padding: 8px 20px;
+            border-radius: 60px;
+        }
+        .info-item {
+            text-align: center;
+            color: #ffd966;
+            font-size: 0.8rem;
+        }
+        .info-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-left: 6px;
+        }
+        .bet-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 5px 16px;
+            border-radius: 60px;
+        }
+        .bet-btn {
+            background: #2a2a3a;
             border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffd966;
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-            /* 无文字，完全依靠背景图上的图案 */
-            text-indent: -9999px;
-            overflow: hidden;
         }
-        .hotspot:active {
-            transform: scale(0.96);
+        .spin-btn {
+            background: radial-gradient(circle at 30% 20%, #ffcf6e, #be691f);
+            border: none;
+            width: 160px;
+            padding: 10px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: #2d1e09;
+            box-shadow: 0 4px 0 #784818;
+            cursor: pointer;
         }
-        /* 根据背景图设计，手动调整每个按钮的位置和大小 */
-        /* 左侧群组 (加速、自动) */
-        .left-group {
-            display: flex;
-            gap: 15px;
-            margin-right: 20px;
-        }
-        .left-group .hotspot {
-            width: 55px;
-            height: 40px;
-        }
-        /* 中间减号和加号 */
-        .adj-btn {
-            width: 44px;
-            height: 44px;
-        }
-        /* 中央大旋转按钮 */
-        .spin-big {
-            width: 90px;
-            height: 50px;
-            margin: 0 10px;
-        }
-        /* 右侧群组 (历史) */
-        .right-group {
-            display: flex;
-            gap: 15px;
-            margin-left: 20px;
-        }
-        .right-group .hotspot {
-            width: 55px;
-            height: 40px;
-        }
-        /* 额外精确微调坐标（如果你需要移动，可以修改 margin 或 position relative） */
-        .hotspot {
-            position: relative;
-        }
-        /* 你可以在此处为每个按钮单独添加偏移，例如：
-        .hotspot-speed { top: -2px; }
-        */
+        .spin-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #784818; }
+        .version { font-size: 0.55rem; color: #ffcc8844; }
     </style>
 </head>
 <body>
@@ -176,186 +154,134 @@
         <div class="win-line"></div>
     </div>
     <div class="panel-bottom">
-        <div class="info-bar">
-            <div>💰 余额 <span id="balance">1000</span></div>
-            <div>🏆 得分 <span id="score">0</span></div>
-            <div>🎲 总押分 <span id="totalBet">20</span></div>
+        <div class="info-row">
+            <div class="info-item">💰 余额 <span class="info-value" id="balance">1000</span></div>
+            <div class="info-item">🏆 得分 <span class="info-value" id="score">0</span></div>
+            <div class="info-item">🎲 押分 <span class="info-value" id="totalBet">20</span></div>
         </div>
-        <!-- 热区按钮：无文字，完全依赖背景图上的设计 -->
-        <div class="button-hotspots">
-            <div class="left-group">
-                <button class="hotspot" id="speedBtn" aria-label="加速"></button>
-                <button class="hotspot" id="autoBtn" aria-label="自动"></button>
-            </div>
-            <button class="hotspot adj-btn" id="minusBet" aria-label="减"></button>
-            <button class="hotspot spin-big" id="spinBtn" aria-label="旋转"></button>
-            <button class="hotspot adj-btn" id="plusBet" aria-label="加"></button>
-            <div class="right-group">
-                <button class="hotspot" id="historyBtn" aria-label="历史"></button>
-            </div>
+        <div class="bet-control">
+            <button class="bet-btn" id="minusBet">−</button>
+            <div style="color:#ffd966; min-width:60px; text-align:center;" id="betAmount">20</div>
+            <button class="bet-btn" id="plusBet">+</button>
         </div>
-    </div>
-</div>
-<div id="historyModal" class="history-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:1000; visibility:hidden;">
-    <div style="background:#1e1e2e; border-radius:16px; padding:20px; width:280px; max-height:70%; overflow-y:auto; border:1px solid #ffd966; color:#ffd966;">
-        <h3 style="margin-bottom:12px">📜开奖记录</h3>
-        <ul id="historyList" style="list-style:none; padding:0; font-size:0.75rem;"></ul>
-        <button id="closeHistory" style="margin-top:15px; background:#ffcf6e; border:none; padding:8px; width:100%; border-radius:30px; cursor:pointer;">关闭</button>
+        <button class="spin-btn" id="spinBtn">🎰 旋转 🎰</button>
+        <div class="version">v.final</div>
     </div>
 </div>
 
 <script>
-    (function(){
-        // ---------- 老虎数据 ----------
-        const TIGERS = {
-            green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
-            red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
-            gold:  { name:'金虎', color:'gold',  img:'tiger-gold.png',  mult:88 }
-        };
-        const LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
-        function rand() { return LIST[Math.floor(Math.random()*3)]; }
-        function makeStrip() { return [rand(), rand(), rand()]; }
+    const TIGERS = {
+        green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
+        red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
+        gold:  { name:'金虎', color:'gold',  img:'tiger-gold.png',  mult:88 }
+    };
+    const LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
+    function randTiger() { return LIST[Math.floor(Math.random()*3)]; }
 
-        let strips = [makeStrip(), makeStrip(), makeStrip()];
-        let offsets = [1, 1, 1];
-        let balance = 1000, score = 0, bet = 20;
-        let spinning = false;
-        let autoFlag = false;
-        let speedFactor = 1;          // 1正常，0.5加速
+    // 每个卷轴生成三个老虎（上中下）
+    function generateStrip() {
+        return [randTiger(), randTiger(), randTiger()];
+    }
 
-        const stripDivs = [
-            document.getElementById('strip0'),
-            document.getElementById('strip1'),
-            document.getElementById('strip2')
-        ];
-        const balanceSpan = document.getElementById('balance');
-        const scoreSpan = document.getElementById('score');
-        const totalBetSpan = document.getElementById('totalBet');
-        const spinBtn = document.getElementById('spinBtn');
-        const minusBtn = document.getElementById('minusBet');
-        const plusBtn = document.getElementById('plusBet');
-        const speedBtn = document.getElementById('speedBtn');
-        const autoBtn = document.getElementById('autoBtn');
-        const historyBtn = document.getElementById('historyBtn');
-        const modal = document.querySelector('.history-modal');
-        const historyList = document.getElementById('historyList');
-        const closeHistory = document.getElementById('closeHistory');
+    let strips = [generateStrip(), generateStrip(), generateStrip()];
+    let positions = [1, 1, 1];   // 当前显示中间老虎的索引（永远只变图片，位置不动）
+    let balance = 1000, score = 0, bet = 20, spinning = false;
 
-        let historyRecords = [];
+    const stripsDOM = [document.getElementById('strip0'), document.getElementById('strip1'), document.getElementById('strip2')];
+    const balanceSpan = document.getElementById('balance');
+    const scoreSpan = document.getElementById('score');
+    const totalBetSpan = document.getElementById('totalBet');
+    const betAmountSpan = document.getElementById('betAmount');
+    const spinBtn = document.getElementById('spinBtn');
+    const minusBtn = document.getElementById('minusBet');
+    const plusBtn = document.getElementById('plusBet');
 
-        function renderReel(idx) {
-            const s = strips[idx];
-            const container = stripDivs[idx];
-            container.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                const item = document.createElement('div');
-                item.className = 'reel-item';
-                const img = document.createElement('img');
-                img.className = 'reel-img';
-                img.src = s[i].img;
-                item.appendChild(img);
-                container.appendChild(item);
-            }
-            container.style.transform = `translateY(${-offsets[idx] * 120}px)`;
+    function renderReel(index) {
+        const strip = strips[index];
+        const container = stripsDOM[index];
+        if(!container) return;
+        container.innerHTML = '';
+        for(let i=0; i<3; i++) {
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            const img = document.createElement('img');
+            img.className = 'reel-img';
+            img.src = strip[i].img;
+            div.appendChild(img);
+            container.appendChild(div);
         }
+        // 调整偏移使得中间老虎（索引1）显示在可视区域
+        const itemHeight = 120;
+        const offset = -positions[index] * itemHeight;
+        container.style.transform = `translateY(${offset}px)`;
+    }
 
-        function updateUI() {
-            balanceSpan.innerText = balance;
-            scoreSpan.innerText = score;
-            totalBetSpan.innerText = bet;
-        }
+    function updateUI() {
+        balanceSpan.innerText = balance;
+        scoreSpan.innerText = score;
+        totalBetSpan.innerText = bet;
+        betAmountSpan.innerText = bet;
+    }
 
-        function addHistory(msg) {
-            historyRecords.unshift(msg);
-            if (historyRecords.length > 20) historyRecords.pop();
-            historyList.innerHTML = '';
-            historyRecords.forEach(rec => {
-                const li = document.createElement('li');
-                li.textContent = rec;
-                historyList.appendChild(li);
-            });
-        }
+    function getCurrentTigers() {
+        return [strips[0][positions[0]], strips[1][positions[1]], strips[2][positions[2]]];
+    }
 
-        // 单向滚动（严格向下，不摇摆）
-        function startRolling(idx, duration, finalStrip, finalOffset) {
-            return new Promise((resolve) => {
-                const startOffset = offsets[idx];
-                let stepsNeeded = 12 + ((finalOffset - startOffset + 3) % 3);
-                let step = 0;
-                let currentOff = startOffset;
-                const stepDuration = duration / stepsNeeded;
-                function stepRoll() {
-                    if (step >= stepsNeeded) {
-                        strips[idx] = finalStrip;
-                        offsets[idx] = finalOffset;
-                        renderReel(idx);
-                        resolve();
-                        return;
-                    }
-                    currentOff = (currentOff + 1) % 3;
-                    offsets[idx] = currentOff;
-                    renderReel(idx);
-                    step++;
-                    setTimeout(stepRoll, stepDuration);
-                }
-                stepRoll();
-            });
-        }
+    function calcMultiplier(t1,t2,t3) {
+        if(t1.color === t2.color && t2.color === t3.color) return t1.mult;
+        return 8;
+    }
 
-        async function spin() {
-            if (spinning) return;
-            if (balance < bet) {
-                if (autoFlag) autoFlag = false;
-                alert('余额不足');
-                return;
-            }
-            spinning = true;
-            balance -= bet;
-            updateUI();
-
-            const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
-            const finalOffsets = [1, 1, 1];
-            const durations = [600, 900, 1200].map(d => d * speedFactor);
-            const promises = [];
-            for (let i = 0; i < 3; i++) {
-                promises.push(startRolling(i, durations[i], finalStrips[i], finalOffsets[i]));
-            }
-            await Promise.all(promises);
-
-            const t0 = strips[0][1], t1 = strips[1][1], t2 = strips[2][1];
-            let mult = (t0.color === t1.color && t1.color === t2.color) ? t0.mult : 8;
-            let win = bet * mult;
-            if (win > 0) {
-                balance += win;
-                score += win;
-                addHistory(`🎉中奖 +${win} (${mult}倍) ${t0.name} ${t1.name} ${t2.name}`);
-            } else {
-                addHistory(`😞未中奖 ${t0.name} ${t1.name} ${t2.name}`);
-            }
-            updateUI();
-            spinning = false;
-            if (autoFlag && balance >= bet) setTimeout(() => spin(), 200);
-            else if (autoFlag && balance < bet) autoFlag = false;
-        }
-
-        // 事件绑定
-        minusBtn.onclick = () => { if (bet > 10) { bet -= 10; updateUI(); } };
-        plusBtn.onclick  = () => { if (bet < 500) { bet += 10; updateUI(); } };
-        spinBtn.onclick = () => { if (!spinning) spin(); };
-        speedBtn.onclick = () => {
-            speedFactor = speedFactor === 1 ? 0.5 : 1;
-            // 按钮无文字，所以无需更改文本，但可以保留 title 提示
-        };
-        autoBtn.onclick = () => {
-            autoFlag = !autoFlag;
-            if (autoFlag && !spinning && balance >= bet) spin();
-        };
-        historyBtn.onclick = () => modal.style.visibility = 'visible';
-        closeHistory.onclick = () => modal.style.visibility = 'hidden';
-
-        for (let i = 0; i < 3; i++) renderReel(i);
+    // 滚动：只改变每个卷轴内部的三张图片（内容滚动），槽位位置不变
+    async function spin() {
+        if(spinning) return;
+        if(balance < bet) { alert('余额不足'); return; }
+        spinning = true;
+        spinBtn.disabled = true;
+        balance -= bet;
         updateUI();
-    })();
+
+        let steps = 0;
+        const MAX_STEPS = 12;
+        // 预先生成最终每个卷轴的完整三张图片
+        const finalStrips = [generateStrip(), generateStrip(), generateStrip()];
+
+        const interval = setInterval(() => {
+            // 每次刷新随机图片（模拟滚动）
+            for(let i=0; i<3; i++) {
+                strips[i] = generateStrip();
+                renderReel(i);
+            }
+            steps++;
+            if(steps >= MAX_STEPS) {
+                clearInterval(interval);
+                // 设置最终结果
+                strips = finalStrips;
+                for(let i=0; i<3; i++) renderReel(i);
+                const [t0,t1,t2] = getCurrentTigers();
+                const mult = calcMultiplier(t0,t1,t2);
+                const win = bet * mult;
+                if(win > 0) {
+                    balance += win;
+                    score += win;
+                    alert(`🎉 中奖 ${win} 分 (${mult}倍) ${t0.name} ${t1.name} ${t2.name}`);
+                } else {
+                    alert(`😞 未中奖 ${t0.name} ${t1.name} ${t2.name}`);
+                }
+                updateUI();
+                spinning = false;
+                spinBtn.disabled = false;
+            }
+        }, 70);
+    }
+
+    minusBtn.onclick = () => { if(bet > 10) { bet -= 10; updateUI(); } };
+    plusBtn.onclick  = () => { if(bet < 500) { bet += 10; updateUI(); } };
+    spinBtn.onclick = spin;
+
+    // 初始化
+    for(let i=0;i<3;i++) renderReel(i);
+    updateUI();
 </script>
 </body>
 </html>
