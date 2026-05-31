@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>老虎机 | 竖排掉落滚动</title>
     <style>
         * {
             user-select: none;
@@ -17,6 +18,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: system-ui, 'Segoe UI', sans-serif;
         }
         .app {
             width: 100%;
@@ -26,39 +28,71 @@
             flex-direction: column;
             min-height: 100dvh;
         }
-        /* 上区块 37.5% */
+        /* 上区块 37.5% - 倍率展示 */
         .panel-top {
-            max-width: 4950px;
             flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
         }
-        /* 中区块 28.1% - 老虎机区域 */
+        .multipliers {
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 50px;
+            padding: 8px 20px;
+            display: flex;
+            gap: 18px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .multipliers span:nth-child(1) { color: #6eff6e; }  /* 绿28 */
+        .multipliers span:nth-child(2) { color: #ff8a6e; }  /* 红58 */
+        .multipliers span:nth-child(3) { color: #ffcf4a; }  /* 金88 */
+        .multipliers span:nth-child(4) { color: #aaaaff; }  /* 任意8 */
+
+        /* 中区块 28.1% - 掉落滚动老虎机 */
         .panel-mid {
-            max-width: 490px;
             flex: 28.1;
             background: url('slot-mid.png') center/cover no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             position: relative;
+            overflow: hidden;
         }
-        .slot {
+        /* 每个卷轴容器（从上往下掉落视觉） */
+        .reel {
             width: 90px;
             height: 120px;
             background: rgba(0,0,0,0.5);
             border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 0 2px #ffd96688;
+        }
+        /* 垂直滚动条，内部放置老虎图片 */
+        .reel-strip {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            will-change: transform;
+        }
+        .reel-item {
+            width: 90px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: inset 0 0 0 2px #ffd96688;
         }
-        .tiger-img {
+        .reel-img {
             width: 75px;
             height: 75px;
             object-fit: contain;
         }
-        /* 固定中奖线 */
+        /* 固定中奖线（在老虎后面） */
         .win-line {
             position: absolute;
             top: 50%;
@@ -68,10 +102,11 @@
             background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
             transform: translateY(-50%);
             pointer-events: none;
+            z-index: 2;
         }
+
         /* 下区块 34.4% - 控制区 */
         .panel-bottom {
-            max-width: 490px;
             flex: 34.4;
             background: url('slot-bottom.jpg') center/cover no-repeat;
             display: flex;
@@ -81,7 +116,6 @@
             gap: 12px;
             padding: 20px;
         }
-        /* 余额、得分、总押分显示框 */
         .info-row {
             display: flex;
             gap: 20px;
@@ -100,7 +134,6 @@
             font-size: 1.1rem;
             margin-left: 6px;
         }
-        /* 押分控制区 */
         .bet-control {
             display: flex;
             align-items: center;
@@ -109,81 +142,85 @@
             padding: 5px 16px;
             border-radius: 60px;
         }
-        /* 按钮图片 */
-        .btn-minus {
-            background: url('btn-minus.png') center/cover no-repeat;
+        .bet-btn {
+            background: #2a2a3a;
+            border: none;
             width: 40px;
             height: 40px;
-            border: none;
+            border-radius: 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffd966;
             cursor: pointer;
         }
-        .btn-plus {
-            background: url('btn-plus.png') center/cover no-repeat;
-            width: 40px;
-            height: 40px;
+        .spin-btn {
+            background: radial-gradient(circle at 30% 20%, #ffcf6e, #be691f);
             border: none;
-            cursor: pointer;
-        }
-        .btn-spin {
-            background: url('btn-spin.png') center/cover no-repeat;
             width: 160px;
-            height: 50px;
-            border: none;
+            padding: 10px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: #2d1e09;
+            box-shadow: 0 4px 0 #784818;
             cursor: pointer;
         }
-        .btn-minus:active, .btn-plus:active, .btn-spin:active {
-            transform: scale(0.96);
-        }
-        .version {
-            font-size: 0.55rem;
-            color: #ffcc8844;
-        }
+        .spin-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #784818; }
+        .version { font-size: 0.55rem; color: #ffcc8844; }
     </style>
 </head>
 <body>
 <div class="app">
-    <div class="panel-top"></div>
+    <div class="panel-top">
+        <div class="multipliers">
+            <span>🟢 28X</span>
+            <span>🔴 58X</span>
+            <span>🟡 88X</span>
+            <span>🎲 任意 8X</span>
+        </div>
+    </div>
     <div class="panel-mid">
-        <div class="slot"><img class="tiger-img" id="tiger0" src="tiger-green.png" alt="虎"></div>
-        <div class="slot"><img class="tiger-img" id="tiger1" src="tiger-green.png" alt="虎"></div>
-        <div class="slot"><img class="tiger-img" id="tiger2" src="tiger-green.png" alt="虎"></div>
+        <div class="reel" id="reel0"><div class="reel-strip" id="strip0"></div></div>
+        <div class="reel" id="reel1"><div class="reel-strip" id="strip1"></div></div>
+        <div class="reel" id="reel2"><div class="reel-strip" id="strip2"></div></div>
         <div class="win-line"></div>
     </div>
     <div class="panel-bottom">
-        <!-- 余额、得分、总押分显示框 -->
         <div class="info-row">
             <div class="info-item">💰 余额 <span class="info-value" id="balance">1000</span></div>
             <div class="info-item">🏆 得分 <span class="info-value" id="score">0</span></div>
-            <div class="info-item">🎲 总押分 <span class="info-value" id="totalBet">20</span></div>
+            <div class="info-item">🎲 押分 <span class="info-value" id="totalBet">20</span></div>
         </div>
-        <!-- 加减押分按钮 -->
         <div class="bet-control">
-            <button class="btn-minus" id="minusBet"></button>
+            <button class="bet-btn" id="minusBet">−</button>
             <div style="color:#ffd966; min-width:60px; text-align:center;" id="betAmount">20</div>
-            <button class="btn-plus" id="plusBet"></button>
+            <button class="bet-btn" id="plusBet">+</button>
         </div>
-        <!-- 旋转按钮 -->
-        <button class="btn-spin" id="spinBtn"></button>
-        <div class="version">v.img</div>
+        <button class="spin-btn" id="spinBtn">🎰 旋转 🎰</button>
+        <div class="version">v.drop</div>
     </div>
 </div>
 
 <script>
-    // 老虎配置
+    // 老虎图片及倍率
     const TIGERS = {
         green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
         red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
         gold:  { name:'金虎', color:'gold',  img:'tiger-gold.png',  mult:88 }
     };
     const TIGER_LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
-    function randomTiger() { return TIGER_LIST[Math.floor(Math.random()*3)]; }
+    function randTiger() { return TIGER_LIST[Math.floor(Math.random()*3)]; }
 
-    // DOM 元素
-    const tigerImgs = [
-        document.getElementById('tiger0'),
-        document.getElementById('tiger1'),
-        document.getElementById('tiger2')
-    ];
+    // 生成一组3个老虎（用于每个卷轴的上/中/下）
+    function generateStrip() {
+        return [randTiger(), randTiger(), randTiger()];
+    }
+
+    let strips = [generateStrip(), generateStrip(), generateStrip()];
+    let positions = [1, 1, 1];   // 显示中间索引（永远只变化内容，位置固定）
+    let balance = 1000, score = 0, bet = 20, spinning = false;
+
+    const stripElements = [document.getElementById('strip0'), document.getElementById('strip1'), document.getElementById('strip2')];
     const balanceSpan = document.getElementById('balance');
     const scoreSpan = document.getElementById('score');
     const totalBetSpan = document.getElementById('totalBet');
@@ -192,69 +229,81 @@
     const minusBtn = document.getElementById('minusBet');
     const plusBtn = document.getElementById('plusBet');
 
-    let balance = 1000;
-    let currentScore = 0;
-    let bet = 20;
-    let isSpinning = false;
+    function renderReel(index) {
+        const strip = strips[index];
+        const container = stripElements[index];
+        if(!container) return;
+        container.innerHTML = '';
+        for(let i=0; i<3; i++) {
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            const img = document.createElement('img');
+            img.className = 'reel-img';
+            img.src = strip[i].img;
+            div.appendChild(img);
+            container.appendChild(div);
+        }
+        // 偏移量 = 索引 * 120，使中间老虎（索引1）位于可视区
+        const offset = -positions[index] * 120;
+        container.style.transform = `translateY(${offset}px)`;
+    }
 
     function updateUI() {
         balanceSpan.innerText = balance;
-        scoreSpan.innerText = currentScore;
+        scoreSpan.innerText = score;
         totalBetSpan.innerText = bet;
         betAmountSpan.innerText = bet;
     }
 
-    function setTigers(t0, t1, t2) {
-        tigerImgs[0].src = t0.img;
-        tigerImgs[1].src = t1.img;
-        tigerImgs[2].src = t2.img;
+    function getCurrentTigers() {
+        return [strips[0][positions[0]], strips[1][positions[1]], strips[2][positions[2]]];
     }
 
-    // 中奖倍率：三个相同颜色取对应倍率，否则 8 倍
-    function getMultiplier(t1, t2, t3) {
-        if (t1.color === t2.color && t2.color === t3.color) {
-            return t1.mult;
-        }
+    function getMultiplier(t1,t2,t3) {
+        if(t1.color === t2.color && t2.color === t3.color) return t1.mult;
         return 8;
     }
 
+    // 滚动动画（从上往下掉落风格）
     async function spin() {
-        if (isSpinning) return;
-        if (balance < bet) {
-            alert('余额不足');
-            return;
-        }
-        isSpinning = true;
+        if(spinning) return;
+        if(balance < bet) { alert('余额不足'); return; }
+        spinning = true;
         spinBtn.disabled = true;
         minusBtn.disabled = true;
         plusBtn.disabled = true;
-
         balance -= bet;
         updateUI();
 
         let steps = 0;
         const MAX_STEPS = 12;
-        const finalTigers = [randomTiger(), randomTiger(), randomTiger()];
+        // 预先随机最终每个卷轴的完整内容
+        const finalStrips = [generateStrip(), generateStrip(), generateStrip()];
 
         const interval = setInterval(() => {
-            // 滚动动画：随机变化
-            setTigers(randomTiger(), randomTiger(), randomTiger());
+            // 滚动过程中不断随机刷新每个卷轴的三张图（视觉上像掉落）
+            for(let i=0; i<3; i++) {
+                strips[i] = generateStrip();
+                renderReel(i);
+            }
             steps++;
-            if (steps >= MAX_STEPS) {
+            if(steps >= MAX_STEPS) {
                 clearInterval(interval);
-                // 停止在最终结果
-                setTigers(finalTigers[0], finalTigers[1], finalTigers[2]);
-                const multiplier = getMultiplier(finalTigers[0], finalTigers[1], finalTigers[2]);
-                const winAmount = bet * multiplier;
-                if (winAmount > 0) {
-                    balance += winAmount;
-                    currentScore += winAmount;
-                    updateUI();
-                    alert(`🎉 中奖 ${winAmount} 分 (${multiplier}倍) ${finalTigers[0].name} ${finalTigers[1].name} ${finalTigers[2].name}`);
+                // 最终结果
+                strips = finalStrips;
+                for(let i=0; i<3; i++) renderReel(i);
+                const [t0,t1,t2] = getCurrentTigers();
+                const mult = getMultiplier(t0,t1,t2);
+                const win = bet * mult;
+                if(win > 0) {
+                    balance += win;
+                    score += win;
+                    alert(`🎉 中奖 ${win} 分 (${mult}倍) ${t0.name} ${t1.name} ${t2.name}`);
                 } else {
-                    alert(`😞 未中奖 ${finalTigers[0].name} ${finalTigers[1].name} ${finalTigers[2].name}`);
+                    alert(`😞 未中奖 ${t0.name} ${t1.name} ${t2.name}`);
                 }
-                isSpinning = false;
+                updateUI();
+                spinning = false;
                 spinBtn.disabled = false;
                 minusBtn.disabled = false;
                 plusBtn.disabled = false;
@@ -262,19 +311,11 @@
         }, 65);
     }
 
-    // 押分调整
-    minusBtn.addEventListener('click', () => {
-        if (bet > 10) bet -= 10;
-        updateUI();
-    });
-    plusBtn.addEventListener('click', () => {
-        if (bet < 500) bet += 10;
-        updateUI();
-    });
-    spinBtn.addEventListener('click', spin);
+    minusBtn.onclick = () => { if(bet > 10) { bet -= 10; updateUI(); } };
+    plusBtn.onclick  = () => { if(bet < 500) { bet += 10; updateUI(); } };
+    spinBtn.onclick = spin;
 
-    // 初始化
-    setTigers(randomTiger(), randomTiger(), randomTiger());
+    for(let i=0;i<3;i++) renderReel(i);
     updateUI();
 </script>
 </body>
