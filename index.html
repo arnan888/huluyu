@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>老虎机 | 最终版</title>
+    <title>老虎机 | 三区块</title>
     <style>
         * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: #0a0a12;
@@ -19,18 +19,20 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* 主容器宽度500，高度占满，三个板块比例按设计图固定 */
         .app {
-            width: 500px;
-            height: 100vh;
+            width: 100%;
+            max-width: 500px;
+            background: #0f0f1a;
             display: flex;
             flex-direction: column;
-            background: #0f0f1a;
+            min-height: 100dvh;
         }
+        /* 上区块 37.5% */
         .panel-top {
             flex: 37.5;
             background: url('slot-top.jpg') center/cover no-repeat;
         }
+        /* 中区块 28.1% - 老虎机区域 */
         .panel-mid {
             flex: 28.1;
             background: url('slot-mid.png') center/cover no-repeat;
@@ -40,36 +42,22 @@
             gap: 16px;
             position: relative;
         }
-        .panel-bottom {
-            flex: 34.4;
-            background: url('slot-bottom.jpg') center/cover no-repeat;
-            position: relative;
-        }
-        /* 滚轮容器 */
-        .reel {
+        .slot {
             width: 90px;
             height: 120px;
-            background: rgba(0,0,0,0.4);
-            overflow: hidden;
-        }
-        .reel-strip {
-            display: flex;
-            flex-direction: column;
-            will-change: transform;
-        }
-        .reel-item {
-            width: 90px;
-            height: 120px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: inset 0 0 0 2px #ffd96688;
         }
-        .reel-img {
+        .tiger-img {
             width: 75px;
             height: 75px;
             object-fit: contain;
         }
-        /* 中奖线 */
+        /* 固定中奖线 */
         .win-line {
             position: absolute;
             top: 50%;
@@ -77,126 +65,76 @@
             width: 100%;
             height: 3px;
             background: linear-gradient(90deg, transparent, #ffd700, #ffaa33, #ffd700, transparent);
-            pointer-events: none;
             transform: translateY(-50%);
-        }
-        /* 信息栏：完全依照图片位置微调 (top 18% 左右) */
-        .info-bar {
-            position: absolute;
-            top: 18%;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 20px;
-            color: #ffd966;
-            font-size: 0.9rem;
-            font-weight: bold;
-            text-shadow: 0 0 2px black;
             pointer-events: none;
         }
-        .info-bar span {
-            font-size: 1.1rem;
-            margin-left: 5px;
-        }
-        /* 透明按钮热区 — 完全匹配背景图上的设计，不显示任何文字/边框 */
-        .hotzone {
-            position: absolute;
-            bottom: 12%;
-            left: 0;
-            width: 100%;
-            height: 60px;
+        /* 下区块 34.4% - 控制区 */
+        .panel-bottom {
+            flex: 34.4;
+            background: url('slot-bottom.jpg') center/cover no-repeat;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 0;
+            gap: 12px;
+            padding: 20px;
         }
-        .hotzone button {
-            background: transparent;
+        /* 余额、得分、总押分显示框 */
+        .info-row {
+            display: flex;
+            gap: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            padding: 8px 20px;
+            border-radius: 60px;
+        }
+        .info-item {
+            text-align: center;
+            color: #ffd966;
+            font-size: 0.8rem;
+        }
+        .info-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-left: 6px;
+        }
+        /* 押分控制区 */
+        .bet-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 5px 16px;
+            border-radius: 60px;
+        }
+        /* 按钮图片 */
+        .btn-minus {
+            background: url('btn-minus.png') center/cover no-repeat;
+            width: 40px;
+            height: 40px;
             border: none;
             cursor: pointer;
-            outline: none;
-            text-indent: -9999px;
-            overflow: hidden;
         }
-        .hotzone button:active {
-            transform: scale(0.96);
-        }
-        /* 各热区尺寸 (根据背景图上的按钮区域手工匹配) */
-        .btn-left-group {
-            display: flex;
-            gap: 15px;
-            margin-right: 20px;
-        }
-        .btn-left-group button {
-            width: 55px;
+        .btn-plus {
+            background: url('btn-plus.png') center/cover no-repeat;
+            width: 40px;
             height: 40px;
-        }
-        .btn-minus, .btn-plus {
-            width: 44px;
-            height: 44px;
+            border: none;
+            cursor: pointer;
         }
         .btn-spin {
-            width: 90px;
+            background: url('btn-spin.png') center/cover no-repeat;
+            width: 160px;
             height: 50px;
-            margin: 0 10px;
-        }
-        .btn-right-group {
-            display: flex;
-            gap: 15px;
-            margin-left: 20px;
-        }
-        .btn-right-group button {
-            width: 55px;
-            height: 40px;
-        }
-        /* 历史弹窗 (简洁) */
-        .history-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            visibility: hidden;
-        }
-        .history-modal.show {
-            visibility: visible;
-        }
-        .history-card {
-            background: #1e1e2e;
-            border-radius: 16px;
-            padding: 20px;
-            width: 280px;
-            max-height: 70%;
-            overflow-y: auto;
-            border: 1px solid #ffd966;
-            color: #ffd966;
-        }
-        .history-card h3 {
-            margin-bottom: 12px;
-        }
-        .history-list {
-            list-style: none;
-            padding: 0;
-            font-size: 0.75rem;
-        }
-        .history-list li {
-            padding: 6px;
-            border-bottom: 1px solid #ffd96644;
-        }
-        .close-history {
-            margin-top: 15px;
-            background: #ffcf6e;
             border: none;
-            padding: 8px;
-            width: 100%;
-            border-radius: 30px;
             cursor: pointer;
+        }
+        .btn-minus:active, .btn-plus:active, .btn-spin:active {
+            transform: scale(0.96);
+        }
+        .version {
+            font-size: 0.55rem;
+            color: #ffcc8844;
         }
     </style>
 </head>
@@ -204,206 +142,138 @@
 <div class="app">
     <div class="panel-top"></div>
     <div class="panel-mid">
-        <div class="reel" id="reel0"><div class="reel-strip" id="strip0"></div></div>
-        <div class="reel" id="reel1"><div class="reel-strip" id="strip1"></div></div>
-        <div class="reel" id="reel2"><div class="reel-strip" id="strip2"></div></div>
+        <div class="slot"><img class="tiger-img" id="tiger0" src="tiger-green.png" alt="虎"></div>
+        <div class="slot"><img class="tiger-img" id="tiger1" src="tiger-green.png" alt="虎"></div>
+        <div class="slot"><img class="tiger-img" id="tiger2" src="tiger-green.png" alt="虎"></div>
         <div class="win-line"></div>
     </div>
     <div class="panel-bottom">
-        <div class="info-bar">
-            <div>💰 余额 <span id="balance">1000</span></div>
-            <div>🏆 得分 <span id="score">0</span></div>
-            <div>🎲 总押分 <span id="totalBet">20</span></div>
+        <!-- 余额、得分、总押分显示框 -->
+        <div class="info-row">
+            <div class="info-item">💰 余额 <span class="info-value" id="balance">1000</span></div>
+            <div class="info-item">🏆 得分 <span class="info-value" id="score">0</span></div>
+            <div class="info-item">🎲 总押分 <span class="info-value" id="totalBet">20</span></div>
         </div>
-        <div class="hotzone">
-            <div class="btn-left-group">
-                <button id="speedBtn" aria-label="加速"></button>
-                <button id="autoBtn" aria-label="自动"></button>
-            </div>
-            <button id="minusBet" class="btn-minus" aria-label="减"></button>
-            <button id="spinBtn" class="btn-spin" aria-label="旋转"></button>
-            <button id="plusBet" class="btn-plus" aria-label="加"></button>
-            <div class="btn-right-group">
-                <button id="historyBtn" aria-label="历史"></button>
-            </div>
+        <!-- 加减押分按钮 -->
+        <div class="bet-control">
+            <button class="btn-minus" id="minusBet"></button>
+            <div style="color:#ffd966; min-width:60px; text-align:center;" id="betAmount">20</div>
+            <button class="btn-plus" id="plusBet"></button>
         </div>
-    </div>
-</div>
-
-<div id="historyModal" class="history-modal">
-    <div class="history-card">
-        <h3>📜 开奖记录</h3>
-        <ul class="history-list" id="historyList"></ul>
-        <button class="close-history" id="closeHistory">关闭</button>
+        <!-- 旋转按钮 -->
+        <button class="btn-spin" id="spinBtn"></button>
+        <div class="version">v.img</div>
     </div>
 </div>
 
 <script>
-    (function(){
-        // ----- 老虎配置 -----
-        const TIGERS = {
-            green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
-            red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
-            gold:  { name:'金虎', color:'gold',  img:'tiger-gold.png',  mult:88 }
-        };
-        const LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
-        function rand() { return LIST[Math.floor(Math.random()*3)]; }
-        function makeStrip() { return [rand(), rand(), rand()]; }
+    // 老虎配置
+    const TIGERS = {
+        green: { name:'绿虎', color:'green', img:'tiger-green.png', mult:28 },
+        red:   { name:'红虎', color:'red',   img:'tiger-red.png',   mult:58 },
+        gold:  { name:'金虎', color:'gold',  img:'tiger-gold.png',  mult:88 }
+    };
+    const TIGER_LIST = [TIGERS.green, TIGERS.red, TIGERS.gold];
+    function randomTiger() { return TIGER_LIST[Math.floor(Math.random()*3)]; }
 
-        // 状态
-        let strips = [makeStrip(), makeStrip(), makeStrip()];
-        let offsets = [1,1,1];      // 当前显示的索引 (0上,1中,2下)
-        let balance = 1000;
-        let score = 0;
-        let bet = 20;
-        let spinning = false;
-        let autoFlag = false;
-        let speedFactor = 1;         // 1正常, 0.5加速
+    // DOM 元素
+    const tigerImgs = [
+        document.getElementById('tiger0'),
+        document.getElementById('tiger1'),
+        document.getElementById('tiger2')
+    ];
+    const balanceSpan = document.getElementById('balance');
+    const scoreSpan = document.getElementById('score');
+    const totalBetSpan = document.getElementById('totalBet');
+    const betAmountSpan = document.getElementById('betAmount');
+    const spinBtn = document.getElementById('spinBtn');
+    const minusBtn = document.getElementById('minusBet');
+    const plusBtn = document.getElementById('plusBet');
 
-        // DOM
-        const stripDivs = [
-            document.getElementById('strip0'),
-            document.getElementById('strip1'),
-            document.getElementById('strip2')
-        ];
-        const balanceSpan = document.getElementById('balance');
-        const scoreSpan = document.getElementById('score');
-        const totalBetSpan = document.getElementById('totalBet');
-        const spinBtn = document.getElementById('spinBtn');
-        const minusBtn = document.getElementById('minusBet');
-        const plusBtn = document.getElementById('plusBet');
-        const speedBtn = document.getElementById('speedBtn');
-        const autoBtn = document.getElementById('autoBtn');
-        const historyBtn = document.getElementById('historyBtn');
-        const modal = document.getElementById('historyModal');
-        const historyList = document.getElementById('historyList');
-        const closeHistory = document.getElementById('closeHistory');
+    let balance = 1000;
+    let currentScore = 0;
+    let bet = 20;
+    let isSpinning = false;
 
-        let historyRecords = [];
+    function updateUI() {
+        balanceSpan.innerText = balance;
+        scoreSpan.innerText = currentScore;
+        totalBetSpan.innerText = bet;
+        betAmountSpan.innerText = bet;
+    }
 
-        // 渲染一个转轴
-        function renderReel(idx) {
-            const s = strips[idx];
-            const container = stripDivs[idx];
-            container.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                const item = document.createElement('div');
-                item.className = 'reel-item';
-                const img = document.createElement('img');
-                img.className = 'reel-img';
-                img.src = s[i].img;
-                item.appendChild(img);
-                container.appendChild(item);
-            }
-            container.style.transform = `translateY(${-offsets[idx] * 120}px)`;
+    function setTigers(t0, t1, t2) {
+        tigerImgs[0].src = t0.img;
+        tigerImgs[1].src = t1.img;
+        tigerImgs[2].src = t2.img;
+    }
+
+    // 中奖倍率：三个相同颜色取对应倍率，否则 8 倍
+    function getMultiplier(t1, t2, t3) {
+        if (t1.color === t2.color && t2.color === t3.color) {
+            return t1.mult;
         }
+        return 8;
+    }
 
-        function updateUI() {
-            balanceSpan.innerText = balance;
-            scoreSpan.innerText = score;
-            totalBetSpan.innerText = bet;
+    async function spin() {
+        if (isSpinning) return;
+        if (balance < bet) {
+            alert('余额不足');
+            return;
         }
+        isSpinning = true;
+        spinBtn.disabled = true;
+        minusBtn.disabled = true;
+        plusBtn.disabled = true;
 
-        function addHistory(msg) {
-            historyRecords.unshift(msg);
-            if (historyRecords.length > 20) historyRecords.pop();
-            historyList.innerHTML = '';
-            historyRecords.forEach(rec => {
-                const li = document.createElement('li');
-                li.textContent = rec;
-                historyList.appendChild(li);
-            });
-        }
-
-        // 单向滚动 (永不回头，只增加偏移)
-        function startRolling(idx, duration, finalStrip, finalOffset) {
-            return new Promise((resolve) => {
-                const startOffset = offsets[idx];
-                // 滚动步数：保证至少转3圈以上，并最终停在 finalOffset
-                let stepsNeeded = 12 + ((finalOffset - startOffset + 3) % 3);
-                let step = 0;
-                let curOff = startOffset;
-                const stepDuration = duration / stepsNeeded;
-                function stepRoll() {
-                    if (step >= stepsNeeded) {
-                        // 硬性最终结果，无过渡，杜绝回退
-                        strips[idx] = finalStrip;
-                        offsets[idx] = finalOffset;
-                        renderReel(idx);
-                        resolve();
-                        return;
-                    }
-                    curOff = (curOff + 1) % 3;
-                    offsets[idx] = curOff;
-                    renderReel(idx);
-                    step++;
-                    setTimeout(stepRoll, stepDuration);
-                }
-                stepRoll();
-            });
-        }
-
-        // 主旋转流程
-        async function spin() {
-            if (spinning) return;
-            if (balance < bet) {
-                if (autoFlag) autoFlag = false;
-                alert('余额不足');
-                return;
-            }
-            spinning = true;
-            balance -= bet;
-            updateUI();
-
-            const finalStrips = [makeStrip(), makeStrip(), makeStrip()];
-            const finalOffsets = [1,1,1];   // 最终停在中间
-            const baseDurations = [600, 900, 1200];
-            const durations = baseDurations.map(d => d * speedFactor);
-            const promises = [];
-            for (let i = 0; i < 3; i++) {
-                promises.push(startRolling(i, durations[i], finalStrips[i], finalOffsets[i]));
-            }
-            await Promise.all(promises);
-
-            const t0 = strips[0][1], t1 = strips[1][1], t2 = strips[2][1];
-            const same = (t0.color === t1.color && t1.color === t2.color);
-            const multiplier = same ? t0.mult : 8;
-            const winAmount = bet * multiplier;
-            if (winAmount > 0) {
-                balance += winAmount;
-                score += winAmount;
-                addHistory(`🎉 中奖 +${winAmount} (${multiplier}倍) ${t0.name} ${t1.name} ${t2.name}`);
-            } else {
-                addHistory(`😞 未中奖 ${t0.name} ${t1.name} ${t2.name}`);
-            }
-            updateUI();
-            spinning = false;
-            if (autoFlag && balance >= bet) {
-                setTimeout(() => spin(), 200);
-            } else if (autoFlag && balance < bet) {
-                autoFlag = false;
-            }
-        }
-
-        // 事件绑定
-        minusBtn.onclick = () => { if (bet > 10) { bet -= 10; updateUI(); } };
-        plusBtn.onclick  = () => { if (bet < 500) { bet += 10; updateUI(); } };
-        spinBtn.onclick = () => { if (!spinning) spin(); };
-        speedBtn.onclick = () => {
-            speedFactor = (speedFactor === 1) ? 0.5 : 1;
-            // 热区按钮无文本，无需改动显示
-        };
-        autoBtn.onclick = () => {
-            autoFlag = !autoFlag;
-            if (autoFlag && !spinning && balance >= bet) spin();
-        };
-        historyBtn.onclick = () => modal.classList.add('show');
-        closeHistory.onclick = () => modal.classList.remove('show');
-
-        // 初始化
-        for (let i = 0; i < 3; i++) renderReel(i);
+        balance -= bet;
         updateUI();
-    })();
+
+        let steps = 0;
+        const MAX_STEPS = 12;
+        const finalTigers = [randomTiger(), randomTiger(), randomTiger()];
+
+        const interval = setInterval(() => {
+            // 滚动动画：随机变化
+            setTigers(randomTiger(), randomTiger(), randomTiger());
+            steps++;
+            if (steps >= MAX_STEPS) {
+                clearInterval(interval);
+                // 停止在最终结果
+                setTigers(finalTigers[0], finalTigers[1], finalTigers[2]);
+                const multiplier = getMultiplier(finalTigers[0], finalTigers[1], finalTigers[2]);
+                const winAmount = bet * multiplier;
+                if (winAmount > 0) {
+                    balance += winAmount;
+                    currentScore += winAmount;
+                    updateUI();
+                    alert(`🎉 中奖 ${winAmount} 分 (${multiplier}倍) ${finalTigers[0].name} ${finalTigers[1].name} ${finalTigers[2].name}`);
+                } else {
+                    alert(`😞 未中奖 ${finalTigers[0].name} ${finalTigers[1].name} ${finalTigers[2].name}`);
+                }
+                isSpinning = false;
+                spinBtn.disabled = false;
+                minusBtn.disabled = false;
+                plusBtn.disabled = false;
+            }
+        }, 65);
+    }
+
+    // 押分调整
+    minusBtn.addEventListener('click', () => {
+        if (bet > 10) bet -= 10;
+        updateUI();
+    });
+    plusBtn.addEventListener('click', () => {
+        if (bet < 500) bet += 10;
+        updateUI();
+    });
+    spinBtn.addEventListener('click', spin);
+
+    // 初始化
+    setTigers(randomTiger(), randomTiger(), randomTiger());
+    updateUI();
 </script>
 </body>
 </html>
